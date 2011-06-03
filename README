@@ -1,0 +1,14 @@
+Bugzilla CLI client and XML-RPC interface library
+-------------------------------------------------
+
+Provides a CLI program and Python library for interacting with the
+Bugzilla_ bug tracking system.
+
+Requires Bugzilla 4.0 or later.
+
+``bugzillalib``
+  Library providing access to a Bugzilla instance through its XML-RPC
+  interface.  Supports bug creation, commenting, reassignment and status
+  updates.
+
+.. _Bugzilla: http://www.bugzilla.org/
