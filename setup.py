@@ -1,8 +1,7 @@
 from distutils.core import setup
 
-file = open('README')
-long_description = file.read()
-file.close()
+with open('README') as fh:
+    long_description = fh.read()
 
 setup(
     name='bugzillatools',
@@ -12,6 +11,7 @@ setup(
     author_email='frasert@jumbolotteries.com',
     url='http://www.jumbointeractive.com/',
     packages=['bzlib'],
+    scripts=['bin/bugzilla'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+# bugzilla - a command line interface to Bugzilla
+# Copyright (C) 2011 Benon Technologies Pty Ltd
+#
+# bugzillatools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+import argparse
+import sys
+
+import bzlib.bugzilla
+import bzlib.command
+import bzlib.config
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--server', default=bzlib.config.get('default_server'),
+    help='Handle of Bugzilla instance to use')
+parser.add_argument('--url', help='Base URL of Bugzilla instance')
+parser.add_argument('--user', help='Bugzilla username')
+parser.add_argument('--password', help='Bugzilla password')
+
+subparsers = parser.add_subparsers()
+
+# add subcommands
+for command in bzlib.command.commands:
+    command_parser = subparsers.add_parser(command.__name__.lower())
+    for arg in command.args:
+        command_parser.add_argument(*arg['args'], **arg['kwargs'])
+    command_parser.set_defaults(command=command)
+
+# parse args
+args = parser.parse_args()
+
+# construct the Bugzilla object
+try:
+    url, user, pw = bzlib.config.get('servers')[args.server]
+except TypeError, KeyError:
+    sys.exit("No configuration for server '{}'".format(args.server))
+url = args.url or url
+user = args.user or user
+pw = args.password or pw
+bz = bzlib.bugzilla.Bugzilla(url, user, pw)
+
+# execute command
+args.command(bz)(args)
