@@ -17,7 +17,7 @@
 import re
 import xmlrpclib
 
-import bzlib.bug
+from . import bug
 
 
 class Bugzilla(object):
@@ -52,4 +52,4 @@ class Bugzilla(object):
 
     def bug(self, bugno):
         """Extrude a Bug object."""
-        return bzlib.bug.Bug(self, bugno)
+        return bug.Bug(self, bugno)
