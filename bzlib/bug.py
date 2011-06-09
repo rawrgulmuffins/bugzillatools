@@ -55,12 +55,6 @@ class Bug(object):
         if not self.data:
             self.data = self.rpc('get', ids=[self.bugno])['bugs'][0]
 
-    def refresh(self):
-        """Read the bug, even if already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        self.data = self.rpc('get', ids=[self.bugno])['bugs'][0]
-
     def read_comments(self):
         """Read bug comments, unless already read."""
         if not self.bugno:
@@ -69,13 +63,6 @@ class Bug(object):
             key = str(self.bugno)
             self.comments = \
                 self.rpc('comments', ids=[self.bugno])['bugs'][key]['comments']
-
-    def refresh_comments(self):
-        """Read bug comments, even if already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        self.comments = \
-            self.rpc('comments', ids=[self.bugno])['bugs'][self.bugno]
 
     def create(self):
         """Create a new bug.
@@ -113,18 +100,32 @@ class Bug(object):
         if resolution:
             kwargs['resolution'] = resolution
         if comment:
-            kwargs['comment'] = comment
+            kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
             self.comments = None  # comments are stale
 
-    def set_assigned_to(self, user, comment=None):
+    def set_assigned_to(self, user, comment=None, update_status=True):
+        """Reassign this bug.
+
+        user: the new assignee
+        comment: optional comment
+        update_status: change status to ASSIGNED, iff status is currently NEW
+        """
+
         # TODO search for a single User who matches `user'
         #      (requires "user matching" to be turned on)
+        kwargs = {'assigned_to': user}
         if comment:
-            kwargs['comment'] = comment
+            kwargs['comment'] = {'body': comment}
         # TODO if comment is None, automatically construct comment?
+        if update_status:
+            # check current status
+            if not self.data:
+                self.read()
+            if self.data['status'] == 'NEW':
+                kwargs['status'] = 'ASSIGNED'
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
