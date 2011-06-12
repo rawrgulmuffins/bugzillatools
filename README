@@ -4,10 +4,14 @@ Bugzilla CLI client and XML-RPC interface library
 Provides a CLI program and Python library for interacting with the
 Bugzilla_ bug tracking system.
 
-Requires Bugzilla 4.0 or later.
+Requires Python 2.7 and works with Bugzilla 4.0 or later.
+
+``bugzilla``
+  Command-line application for interacting with Bugzilla instances.
+  Commands include: assign, comment, fix, info, list, reop.
 
 ``bugzillalib``
-  Library providing access to a Bugzilla instance through its XML-RPC
+  Library providing access to Bugzilla instances through its XML-RPC
   interface.  Supports bug creation, commenting, reassignment and status
   updates.
 

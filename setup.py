@@ -5,11 +5,11 @@ with open('README') as fh:
 
 setup(
     name='bugzillatools',
-    version='0.1dev',
+    version='0.1',
     description='Bugzilla CLI client and XML-RPC interface library',
     author='Fraser Tweedale',
     author_email='frasert@jumbolotteries.com',
-    url='http://www.jumbointeractive.com/',
+    url='https://gitorious.org/bugzillatools',
     packages=['bzlib'],
     scripts=['bin/bugzilla'],
     classifiers=[
@@ -19,7 +19,7 @@ setup(
         'Intended Audience :: Information Technology',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.4',
+        'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Bug Tracking',
     ],
     long_description=long_description,
