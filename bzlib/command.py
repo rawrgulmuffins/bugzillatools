@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ class Command(object):
 
 class Assign(Command):
     """Reassign the given bugs."""
+    help = 'Assign bugs to the given user'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
         arg('--to', metavar='ASSIGNEE', help='New assignee'),
@@ -63,6 +64,7 @@ class Assign(Command):
 
 class Comment(Command):
     """Comment on the given bugs."""
+    help = 'Add a comment to the given bugs'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
         arg('-m', '--message', help='Comment on the change'),
@@ -74,6 +76,7 @@ class Comment(Command):
 
 class Fix(Command):
     """Fix the given bugs."""
+    help = 'Mark the given bugs fixed'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
         arg('-m', '--message', help='Comment on the change'),
@@ -92,6 +95,7 @@ class Fix(Command):
 
 class Info(Command):
     """Show detailed information about the given bugs."""
+    help = 'Show detailed information about the given bugs'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
     ]
@@ -110,6 +114,7 @@ class Info(Command):
 
 class List(Command):
     """Show a one-line summary of given given bugs."""
+    help = 'Show a one-line summary of the given bugs'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
     ]
@@ -127,11 +132,13 @@ class List(Command):
 
 class New(Command):
     """File a new bug."""
+    help = 'File a new bug'
     pass
 
 
 class Products(Command):
     """List accessible products of a Bugzilla."""
+    help = 'List the products of a Bugzilla instance'
     args = []
 
     def __call__(self, args):
@@ -146,6 +153,7 @@ class Products(Command):
 
 class Reop(Command):
     """Reopen the given bugs."""
+    help = 'Reopen the given bugs'
     args = [
         arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
         arg('-m', '--message', help='Comment on the change'),
@@ -162,6 +170,7 @@ class Reop(Command):
 
 
 class Search(Command):
+    help = 'Search for bugs with supplied attributes'
     pass
 
 
