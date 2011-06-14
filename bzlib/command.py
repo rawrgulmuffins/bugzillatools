@@ -130,6 +130,20 @@ class New(Command):
     pass
 
 
+class Products(Command):
+    """List accessible products of a Bugzilla."""
+    args = []
+
+    def __call__(self, args):
+        ids = self.bz.rpc('Product', 'get_accessible_products')['ids']
+        products = self.bz.rpc('Product', 'get', ids=ids)['products']
+        width = max(map(lambda x: len(x['name']), products)) + 1
+        for product in products:
+            print '{:{}} {}'.format(
+                product['name'] + ':', width, product['description']
+            )
+
+
 class Reop(Command):
     """Reopen the given bugs."""
     args = [
@@ -157,5 +171,6 @@ commands = [
     Fix,
     Info,
     List,
+    Products,
     Reop,
 ]
