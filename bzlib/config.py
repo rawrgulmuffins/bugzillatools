@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,9 +39,11 @@ config = read_config()
 
 
 def get(key):
+    if not config:
+        return None
     try:
         return config[key]
-    except KeyError, TypeError:
+    except KeyError:
         try:
             return default[key]
         except KeyError:
