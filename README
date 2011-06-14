@@ -8,7 +8,7 @@ Requires Python 2.7 and works with Bugzilla 4.0 or later.
 
 ``bugzilla``
   Command-line application for interacting with Bugzilla instances.
-  Commands include: assign, comment, fix, info, list, reop.
+  Commands include: assign, comment, fix, info, list, products, reop.
 
 ``bugzillalib``
   Library providing access to Bugzilla instances through its XML-RPC

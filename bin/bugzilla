@@ -32,11 +32,14 @@ parser.add_argument('--url', help='Base URL of Bugzilla instance')
 parser.add_argument('--user', help='Bugzilla username')
 parser.add_argument('--password', help='Bugzilla password')
 
-subparsers = parser.add_subparsers()
+subparsers = parser.add_subparsers(title='subcommands')
 
 # add subcommands
 for command in bzlib.command.commands:
-    command_parser = subparsers.add_parser(command.__name__.lower())
+    command_parser = subparsers.add_parser(
+        command.__name__.lower(),
+        help=command.help
+    )
     for arg in command.args:
         command_parser.add_argument(*arg['args'], **arg['kwargs'])
     command_parser.set_defaults(command=command)
