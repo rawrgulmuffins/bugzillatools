@@ -66,9 +66,7 @@ if not (url and user and password):
             sys.exit("No configuration for server '{}'.".format(args.server))
 
     url = args.url or url
-user = args.user or user
-pw = args.password or pw
-bz = bzlib.bugzilla.Bugzilla(url, user, pw)
+bz = bzlib.bugzilla.Bugzilla(url, user, password)
 
 # execute command
 args.command(bz)(args)
