@@ -22,6 +22,8 @@ from . import bug
 
 class Bugzilla(object):
 
+    _fields = None
+
     def __init__(self, url, user, password):
         """Create a Bugzilla XML-RPC client.
 
@@ -53,3 +55,10 @@ class Bugzilla(object):
     def bug(self, bugno):
         """Extrude a Bug object."""
         return bug.Bug(self, bugno)
+
+    def get_fields(self, use_cache=True):
+        """Get information about bug fields."""
+        if use_cache and self._fields:
+            return self._fields
+        self._fields = self.rpc('Bug', 'fields')['fields']
+        return self._fields
