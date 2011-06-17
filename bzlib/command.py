@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
+
 from . import config
 
 
@@ -72,6 +74,30 @@ class Comment(Command):
 
     def __call__(self, args):
         map(lambda x: self.bz.bug(x).add_comment(args.message), args.bugs)
+
+
+class Fields(Command):
+    help = 'List valid values for bug fields.'
+    args = []
+
+    def __call__(self, args):
+        fields = filter(lambda x: 'values' in x, self.bz.get_fields())
+        for field in fields:
+            keyfn = lambda x: x['visibility_values']
+            groups = itertools.groupby(
+                sorted(field['values'], None, keyfn),
+                keyfn
+            )
+            print field['name'], ':'
+            for key, group in groups:
+                values = sorted(group, None, lambda x: int(x['sortkey']))
+                if key:
+                    print '  {}: {}'.format(
+                        key,
+                        ','.join(map(lambda x: x['name'], values))
+                    )
+                else:
+                    print '  ', ','.join(map(lambda x: x['name'], values))
 
 
 class Fix(Command):
@@ -177,6 +203,7 @@ class Search(Command):
 commands = [
     Assign,
     Comment,
+    Fields,
     Fix,
     Info,
     List,
