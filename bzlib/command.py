@@ -14,14 +14,41 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import itertools
 
 from . import config
+from . import editor
 
 
 def arg(*args, **kwargs):
     """Convenience function to create argparse arguments."""
     return {'args': args, 'kwargs': kwargs}
+
+
+def with_bugs(cls):
+    cls.args = cls.args + [
+        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
+    ]
+    return cls
+
+
+def _message_arg_callback(args):
+    if not args.message:
+        if args.file:
+            args.message = args.file.read()
+        else:
+            args.message = editor.input('Enter your comment.')
+
+
+def with_message(cls):
+    cls.args = cls.args + [
+        arg('-F', '--file', metavar='MSGFILE', type=argparse.FileType('r'),
+            help='Take comment from this file'),
+        arg('-m', '--message', help='Comment on the change'),
+    ]
+    cls.arg_callbacks.append(_message_arg_callback)
+    return cls
 
 
 class Command(object):
@@ -35,6 +62,7 @@ class Command(object):
     ArgumentParser.add_argument().
     """
     args = []
+    arg_callbacks = []
 
     def __init__(self, bugzilla):
         """Initialise the Command object."""
@@ -44,17 +72,21 @@ class Command(object):
         """To be implemented by subclasses."""
         raise NotImplementedError
 
+    @classmethod
+    def _run_arg_callbacks(cls):
+        map(lambda x: x(args), cls.arg_callbacks)
 
+
+@with_bugs
+@with_message
 class Assign(Command):
-    """Reassign the given bugs."""
-    help = 'Assign bugs to the given user'
+    """Assign bugs to the given user."""
     args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
         arg('--to', metavar='ASSIGNEE', help='New assignee'),
-        arg('-m', '--message', help='Comment on the change'),
     ]
 
     def __call__(self, args):
+        self.run
         return map(
             lambda x: self.bz.bug(x).set_assigned_to(
                 args.to,
@@ -64,22 +96,16 @@ class Assign(Command):
         )
 
 
+@with_bugs
+@with_message
 class Comment(Command):
-    """Comment on the given bugs."""
-    help = 'Add a comment to the given bugs'
-    args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
-        arg('-m', '--message', help='Comment on the change'),
-    ]
-
+    """Add a comment to the given bugs."""
     def __call__(self, args):
         map(lambda x: self.bz.bug(x).add_comment(args.message), args.bugs)
 
 
 class Fields(Command):
-    help = 'List valid values for bug fields.'
-    args = []
-
+    """List valid values for bug fields."""
     def __call__(self, args):
         fields = filter(lambda x: 'values' in x, self.bz.get_fields())
         for field in fields:
@@ -100,13 +126,10 @@ class Fields(Command):
                     print '  ', ','.join(map(lambda x: x['name'], values))
 
 
+@with_bugs
+@with_message
 class Fix(Command):
-    """Fix the given bugs."""
-    help = 'Mark the given bugs fixed'
-    args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
-        arg('-m', '--message', help='Comment on the change'),
-    ]
+    """Mark the given bugs fixed."""
 
     def __call__(self, args):
         return map(
@@ -119,13 +142,9 @@ class Fix(Command):
         )
 
 
+@with_bugs
 class Info(Command):
     """Show detailed information about the given bugs."""
-    help = 'Show detailed information about the given bugs'
-    args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
-    ]
-
     def __call__(self, args):
         fields = config.get_show_fields()
         for bug in map(self.bz.bug, args.bugs):
@@ -138,13 +157,9 @@ class Info(Command):
             print
 
 
+@with_bugs
 class List(Command):
     """Show a one-line summary of given given bugs."""
-    help = 'Show a one-line summary of the given bugs'
-    args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
-    ]
-
     def __call__(self, args):
         fields = config.get_show_fields()
         lens = map(lambda x: len(str(x)), args.bugs)
@@ -158,15 +173,11 @@ class List(Command):
 
 class New(Command):
     """File a new bug."""
-    help = 'File a new bug'
     pass
 
 
 class Products(Command):
-    """List accessible products of a Bugzilla."""
-    help = 'List the products of a Bugzilla instance'
-    args = []
-
+    """List the products of a Bugzilla instance."""
     def __call__(self, args):
         ids = self.bz.rpc('Product', 'get_accessible_products')['ids']
         products = self.bz.rpc('Product', 'get', ids=ids)['products']
@@ -177,14 +188,10 @@ class Products(Command):
             )
 
 
+@with_bugs
+@with_message
 class Reop(Command):
     """Reopen the given bugs."""
-    help = 'Reopen the given bugs'
-    args = [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
-        arg('-m', '--message', help='Comment on the change'),
-    ]
-
     def __call__(self, args):
         return map(
             lambda x: self.bz.bug(x).set_status(
@@ -196,7 +203,7 @@ class Reop(Command):
 
 
 class Search(Command):
-    help = 'Search for bugs with supplied attributes'
+    """Search for bugs with supplied attributes."""
     pass
 
 
