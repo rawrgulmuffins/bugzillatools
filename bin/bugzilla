@@ -38,7 +38,7 @@ subparsers = parser.add_subparsers(title='subcommands')
 for command in bzlib.command.commands:
     command_parser = subparsers.add_parser(
         command.__name__.lower(),
-        help=command.help
+        help=command.__doc__
     )
     for arg in command.args:
         command_parser.add_argument(*arg['args'], **arg['kwargs'])
