@@ -53,9 +53,10 @@ def input(message, remove_comments=True):
         returncode = subprocess.call([editor, fh.name])
         if returncode:
             raise IOError('Editor did not exit cleanly')
+        fh.seek(0)
         lines = fh.readlines()
         if remove_comments:
-            lines = filter(lambda x: not x or x[0] == '#', lines)
+            lines = filter(lambda x: not x or x[0] != '#', lines)
         if not lines or not lines[0] and len(lines) == 1:
             # no lines, or a single empty line
             raise EmptyInputError()
