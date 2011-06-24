@@ -40,8 +40,7 @@ for command in bzlib.command.commands:
         command.__name__.lower(),
         help=command.__doc__
     )
-    for arg in command.args:
-        command_parser.add_argument(*arg['args'], **arg['kwargs'])
+    map(lambda x: x(command_parser), command.args)
     command_parser.set_defaults(command=command)
 
 # parse args

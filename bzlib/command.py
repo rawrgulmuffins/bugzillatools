@@ -21,33 +21,39 @@ from . import config
 from . import editor
 
 
-def arg(*args, **kwargs):
-    """Convenience function to create argparse arguments."""
-    return {'args': args, 'kwargs': kwargs}
+class _ReadFileAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        setattr(namespace, self.dest, values.read())
 
 
 def with_bugs(cls):
     cls.args = cls.args + [
-        arg('bugs', metavar='BUG', type=int, nargs='+', help='Bug number'),
+        lambda x: x.add_argument('bugs', metavar='BUG', type=int, nargs='+',
+            help='Bug number'),
     ]
     return cls
 
 
-def _message_arg_callback(args):
-    if not args.message:
-        if args.file:
-            args.message = args.file.read()
-        else:
-            args.message = editor.input('Enter your comment.')
-
-
 def with_message(cls):
-    cls.args = cls.args + [
-        arg('-F', '--file', metavar='MSGFILE', type=argparse.FileType('r'),
-            help='Take comment from this file'),
-        arg('-m', '--message', help='Comment on the change'),
-    ]
-    cls.arg_callbacks.append(_message_arg_callback)
+    def msgargs(parser):
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('-F', '--file', metavar='MSGFILE', dest='message',
+            type=argparse.FileType('r'), action=_ReadFileAction,
+            help='Take comment from this file')
+        group.add_argument('-m', '--message', help='Comment on the change')
+    cls.args = cls.args + [msgargs]
+    return cls
+
+
+def with_optional_message(cls):
+    def msgargs(parser):
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('-F', '--file', metavar='MSGFILE', dest='message',
+            type=argparse.FileType('r'), action=_ReadFileAction,
+            help='Take comment from this file')
+        group.add_argument('-m', '--message', nargs='?', const=True,
+            help='Comment on the change. With no argument, invokes an editor.')
+    cls.args = cls.args + [msgargs]
     return cls
 
 
@@ -62,7 +68,6 @@ class Command(object):
     ArgumentParser.add_argument().
     """
     args = []
-    arg_callbacks = []
 
     def __init__(self, bugzilla):
         """Initialise the Command object."""
@@ -72,26 +77,21 @@ class Command(object):
         """To be implemented by subclasses."""
         raise NotImplementedError
 
-    @classmethod
-    def _run_arg_callbacks(cls):
-        map(lambda x: x(args), cls.arg_callbacks)
-
 
 @with_bugs
-@with_message
+@with_optional_message
 class Assign(Command):
     """Assign bugs to the given user."""
     args = [
-        arg('--to', metavar='ASSIGNEE', help='New assignee'),
+        lambda x: x.add_argument('--to', metavar='ASSIGNEE',
+            help='New assignee'),
     ]
 
     def __call__(self, args):
-        self.run
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
         return map(
-            lambda x: self.bz.bug(x).set_assigned_to(
-                args.to,
-                comment=args.message
-            ),
+            lambda x: self.bz.bug(x).set_assigned_to(args.to, comment=message),
             args.bugs
         )
 
@@ -101,7 +101,8 @@ class Assign(Command):
 class Comment(Command):
     """Add a comment to the given bugs."""
     def __call__(self, args):
-        map(lambda x: self.bz.bug(x).add_comment(args.message), args.bugs)
+        message = args.message or editor.input('Enter your comment.')
+        map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
 
 
 class Fields(Command):
@@ -127,16 +128,18 @@ class Fields(Command):
 
 
 @with_bugs
-@with_message
+@with_optional_message
 class Fix(Command):
     """Mark the given bugs fixed."""
 
     def __call__(self, args):
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
         return map(
             lambda x: self.bz.bug(x).set_status(
                 'RESOLVED',
                 resolution='FIXED',
-                comment=args.message
+                comment=message
             ),
             args.bugs
         )
@@ -189,15 +192,14 @@ class Products(Command):
 
 
 @with_bugs
-@with_message
+@with_optional_message
 class Reop(Command):
     """Reopen the given bugs."""
     def __call__(self, args):
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
         return map(
-            lambda x: self.bz.bug(x).set_status(
-                'REOPENED',
-                comment=args.message
-            ),
+            lambda x: self.bz.bug(x).set_status('REOPENED', comment=message),
             args.bugs
         )
 
