@@ -26,6 +26,31 @@ class _ReadFileAction(argparse.Action):
         setattr(namespace, self.dest, values.read())
 
 
+def with_add_remove(src, dst, metavar=None, type=None):
+    def decorator(cls):
+        cls.args = cls.args + [
+            lambda x: x.add_argument('--add', metavar=metavar, type=type,
+                nargs='+',
+                help="Add {} to {}.".format(src, dst)),
+            lambda x: x.add_argument('--remove', metavar=metavar, type=type,
+                nargs='+',
+                help="Remove {} from {}.".format(src, dst)),
+        ]
+        return cls
+    return decorator
+
+
+def with_set(src, dst, metavar=None, type=None):
+    def decorator(cls):
+        cls.args = cls.args + [
+            lambda x: x.add_argument('--set', metavar=metavar, type=type,
+                nargs='+',
+                help="Set {} to {}. Ignore --add, --remove.".format(dst, src)),
+        ]
+        return cls
+    return decorator
+
+
 def with_bugs(cls):
     cls.args = cls.args + [
         lambda x: x.add_argument('bugs', metavar='BUG', type=int, nargs='+',
@@ -96,6 +121,39 @@ class Assign(Command):
         )
 
 
+@with_set('given bugs', 'blocked bugs', metavar='BUG', type=int)
+@with_add_remove('given bugs', 'blocked bugs', metavar='BUG', type=int)
+@with_bugs
+@with_optional_message
+class Block(Command):
+    """List or update bug dependencies."""
+    def __call__(self, args):
+        bugs = map(self.bz.bug, args.bugs)
+        if args.add or args.remove or args.set:
+            message = editor.input('Enter your comment.') \
+                if args.message is True else args.message
+            # update blocked bugs
+            map(
+                lambda x: self.bz.bug(x).update_block(
+                    add=args.add,
+                    remove=args.remove,
+                    set=args.set,
+                    comment=message
+                ),
+                args.bugs
+            )
+        else:
+            # show blocked bugs
+            for bug in bugs:
+                bug.read()
+                print 'Bug {}:'.format(bug.bugno)
+                if bug.data['blocks']:
+                    print '  Blocked bugs: {}'.format(
+                        ', '.join(map(str, bug.data['blocks'])))
+                else:
+                    print '  No blocked bugs'
+
+
 @with_bugs
 @with_message
 class Comment(Command):
@@ -103,6 +161,39 @@ class Comment(Command):
     def __call__(self, args):
         message = args.message or editor.input('Enter your comment.')
         map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
+
+
+@with_set('given bugs', 'depdendencies', metavar='BUG', type=int)
+@with_add_remove('given bugs', 'depdendencies', metavar='BUG', type=int)
+@with_bugs
+@with_optional_message
+class Depend(Command):
+    """List or update bug dependencies."""
+    def __call__(self, args):
+        bugs = map(self.bz.bug, args.bugs)
+        if args.add or args.remove or args.set:
+            message = editor.input('Enter your comment.') \
+                if args.message is True else args.message
+            # update dependencies
+            map(
+                lambda x: x.update_depend(
+                    add=args.add,
+                    remove=args.remove,
+                    set=args.set,
+                    comment=message
+                ),
+                bugs
+            )
+        else:
+            # show dependencies
+            for bug in bugs:
+                bug.read()
+                print 'Bug {}:'.format(bug.bugno)
+                if bug.data['depends_on']:
+                    print '  Dependencies: {}'.format(
+                        ', '.join(map(str, bug.data['depends_on'])))
+                else:
+                    print '  No dependencies'
 
 
 class Fields(Command):
@@ -211,7 +302,9 @@ class Search(Command):
 
 commands = [
     Assign,
+    Block,
     Comment,
+    Depend,
     Fields,
     Fix,
     Info,
