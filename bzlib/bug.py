@@ -130,3 +130,47 @@ class Bug(object):
         self.data = None  # data is stale
         if comment:
                 self.comments = None  # comments are stale
+
+    def update_block(self, add=None, remove=None, set=None, comment=None):
+        """Update the bugs that this bug blocks.
+
+        Accepts arrays of integer bug numbers.
+        """
+        blocks = {}
+        if set:
+            blocks['set'] = set
+        else:
+            if add:
+                blocks['add'] = add
+            if remove:
+                blocks['remove'] = remove
+        kwargs = {'blocks': blocks}
+        if comment:
+            kwargs['comment'] = {'body': comment}
+        # TODO if comment is None, automatically construct comment?
+        self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if comment:
+            self.comments = None  # comments are stale
+
+    def update_depend(self, add=None, remove=None, set=None, comment=None):
+        """Update the bugs on which this bug depends.
+
+        Accepts arrays of integer bug numbers.
+        """
+        depends = {}
+        if set:
+            depends['set'] = set
+        else:
+            if add:
+                depends['add'] = add
+            if remove:
+                depends['remove'] = remove
+        kwargs = {'depends_on': depends}
+        if comment:
+            kwargs['comment'] = {'body': comment}
+        # TODO if comment is None, automatically construct comment?
+        self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if comment:
+            self.comments = None  # comments are stale
