@@ -20,9 +20,14 @@ import xmlrpclib
 from . import bug
 
 
+class UserError(Exception):
+    pass
+
+
 class Bugzilla(object):
 
     _fields = None
+    _user_cache = {}
 
     def __init__(self, url, user, password):
         """Create a Bugzilla XML-RPC client.
@@ -62,3 +67,27 @@ class Bugzilla(object):
             return self._fields
         self._fields = self.rpc('Bug', 'fields')['fields']
         return self._fields
+
+    def match_users(self, fragment, use_cache=True):
+        """Return a list of users matching the given string."""
+        if use_cache and fragment in self._user_cache:
+            return self._user_cache[fragment]
+        users = self.rpc('User', 'get', match=[fragment])['users']
+        if use_cache:
+            self._user_cache[fragment] = users
+        return users
+
+    def match_one_user(self, fragment, use_cache=True):
+        """Return the user matching the given string.
+
+        Raise UserError if the result does not contain exactly one user.
+        """
+        users = self.match_users(fragment)
+        if not users:
+            raise UserError("No users matching '{}'".format(fragment))
+        if len(users) > 1:
+            raise UserError("Multiple users matching '{}': {}".format(
+                fragment,
+                ', '.join(map(lambda x: x['name'], users))
+            ))
+        return users[0]
