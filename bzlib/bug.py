@@ -106,16 +106,22 @@ class Bug(object):
         if comment:
             self.comments = None  # comments are stale
 
-    def set_assigned_to(self, user, comment=None, update_status=True):
+    def set_assigned_to(
+        self,
+        user,
+        comment=None,
+        update_status=True,
+        match=True
+    ):
         """Reassign this bug.
 
         user: the new assignee
         comment: optional comment
         update_status: change status to ASSIGNED, iff status is currently NEW
+        match: search for a user matching the given string
         """
-
-        # TODO search for a single User who matches `user'
-        #      (requires "user matching" to be turned on)
+        if match:
+            user = self.bz.match_one_user(user)['name']
         kwargs = {'assigned_to': user}
         if comment:
             kwargs['comment'] = {'body': comment}
