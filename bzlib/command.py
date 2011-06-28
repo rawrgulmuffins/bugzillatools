@@ -285,7 +285,7 @@ class Products(Command):
 
 @with_bugs
 @with_optional_message
-class Reop(Command):
+class Reopen(Command):
     """Reopen the given bugs."""
     def __call__(self, args):
         message = editor.input('Enter your comment.') if args.message is True \
