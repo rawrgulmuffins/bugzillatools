@@ -94,9 +94,10 @@ class Command(object):
     """
     args = []
 
-    def __init__(self, bugzilla):
+    def __init__(self, bugzilla, ui):
         """Initialise the Command object."""
         self.bz = bugzilla
+        self.ui = ui
 
     def __call__(self, *args, **kwargs):
         """To be implemented by subclasses."""

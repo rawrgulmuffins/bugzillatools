@@ -23,6 +23,7 @@ import sys
 import bzlib.bugzilla
 import bzlib.command
 import bzlib.config
+import bzlib.ui
 
 parser = argparse.ArgumentParser()
 
@@ -68,4 +69,4 @@ if not (url and user and password):
 bz = bzlib.bugzilla.Bugzilla(url, user, password)
 
 # execute command
-args.command(bz)(args)
+args.command(bz, bzlib.ui.UI())(args)
