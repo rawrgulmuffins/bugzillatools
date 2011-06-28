@@ -7,8 +7,33 @@ Bugzilla_ bug tracking system.
 Requires Python 2.7 and works with Bugzilla 4.0 or later.
 
 ``bugzilla``
-  Command-line application for interacting with Bugzilla instances.
-  Commands include: assign, comment, fix, info, list, products, reop.
+  Command-line application for interacting with Bugzilla servers.
+  Implemented actions include:
+
+  ``assign``
+    Assign bugs to the given user.
+  ``block``
+    List or update bug dependencies.
+  ``close``
+    Close the given bugs.
+  ``comment``
+    Add a comment to the given bugs.
+  ``depend``
+    List or update bug dependencies.
+  ``fields``
+    List valid values for bug fields.
+  ``fix``
+    Mark the given bugs fixed.
+  ``info``
+    Show detailed information about the given bugs.
+  ``list``
+    Show a one-line summary of given given bugs.
+  ``products``
+    List the products of a Bugzilla instance.
+  ``reopen``
+    Reopen the given bugs.
+  ``resolve``
+    Resolve the given bugs.
 
 ``bugzillalib``
   Library providing access to Bugzilla instances through its XML-RPC
