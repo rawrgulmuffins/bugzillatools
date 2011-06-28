@@ -266,9 +266,9 @@ class List(Command):
             )
 
 
-class New(Command):
-    """File a new bug."""
-    pass
+#class New(Command):
+#    """File a new bug."""
+#    pass
 
 
 class Products(Command):
@@ -296,20 +296,13 @@ class Reop(Command):
         )
 
 
-class Search(Command):
-    """Search for bugs with supplied attributes."""
-    pass
+#class Search(Command):
+#    """Search for bugs with supplied attributes."""
+#    pass
 
 
-commands = [
-    Assign,
-    Block,
-    Comment,
-    Depend,
-    Fields,
-    Fix,
-    Info,
-    List,
-    Products,
-    Reop,
-]
+# the list got too long; metaprogram it ^_^
+commands = sorted(filter(
+    lambda x: type(x) == type and issubclass(x, Command) and x is not Command,
+    locals().viewvalues()
+))
