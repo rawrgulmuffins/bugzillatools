@@ -339,7 +339,7 @@ class Reopen(Command):
 @with_optional_message
 @with_resolution
 class Resolve(Command):
-    """Mark the given bugs fixed."""
+    """Resolve the given bugs."""
 
     def __call__(self, args):
         message = editor.input('Enter your comment.') if args.message is True \
