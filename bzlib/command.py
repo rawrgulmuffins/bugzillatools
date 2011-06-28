@@ -82,6 +82,16 @@ def with_optional_message(cls):
     return cls
 
 
+def with_resolution(cls):
+    cls.args = cls.args + [
+        lambda x: x.add_argument('--resolution',
+            help='Specify a resolution (case-insensitive).'),
+        lambda x: x.add_argument('--choose-resolution', action='store_true',
+            help='Choose resolution from a list.')
+    ]
+    return cls
+
+
 class Command(object):
     """A command object.
 
@@ -153,6 +163,35 @@ class Block(Command):
                         ', '.join(map(str, bug.data['blocks'])))
                 else:
                     print '  No blocked bugs'
+
+
+@with_bugs
+@with_optional_message
+@with_resolution
+class Close(Command):
+    """Close the given bugs."""
+    def __call__(self, args):
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
+        resolution = None
+        if args.resolution:
+            resolution = args.resolution.upper()
+        elif args.choose_resolution:
+            values = filter(
+                lambda x: x['name'] == 'resolution',
+                self.bz.get_fields()
+            )[0]['values']
+            values = sorted(values, None, lambda x: int(x['sortkey']))
+            values = filter(None, map(lambda x: x['name'], values))
+            resolution = self.ui.choose('Choose a resolution', values)
+        return map(
+            lambda x: self.bz.bug(x).set_status(
+                'CLOSED',
+                resolution=resolution,
+                comment=message
+            ),
+            args.bugs
+        )
 
 
 @with_bugs
@@ -292,6 +331,36 @@ class Reopen(Command):
             else args.message
         return map(
             lambda x: self.bz.bug(x).set_status('REOPENED', comment=message),
+            args.bugs
+        )
+
+
+@with_bugs
+@with_optional_message
+@with_resolution
+class Resolve(Command):
+    """Mark the given bugs fixed."""
+
+    def __call__(self, args):
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
+        if args.resolution:
+            resolution = args.resolution.upper()
+        else:
+            # choose resolution
+            values = filter(
+                lambda x: x['name'] == 'resolution',
+                self.bz.get_fields()
+            )[0]['values']
+            values = sorted(values, None, lambda x: int(x['sortkey']))
+            values = filter(None, map(lambda x: x['name'], values))
+            resolution = self.ui.choose('Choose a resolution', values)
+        return map(
+            lambda x: self.bz.bug(x).set_status(
+                'RESOLVED',
+                resolution=resolution,
+                comment=message
+            ),
             args.bugs
         )
 
