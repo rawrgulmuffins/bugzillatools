@@ -82,6 +82,16 @@ def with_optional_message(cls):
     return cls
 
 
+def with_status(cls):
+    cls.args = cls.args + [
+        lambda x: x.add_argument('--status',
+            help='Specify a resolution (case-insensitive).'),
+        lambda x: x.add_argument('--choose-status', action='store_true',
+            help='Choose status from a list.')
+    ]
+    return cls
+
+
 def with_resolution(cls):
     cls.args = cls.args + [
         lambda x: x.add_argument('--resolution',
@@ -166,35 +176,6 @@ class Block(Command):
 
 
 @with_bugs
-@with_optional_message
-@with_resolution
-class Close(Command):
-    """Close the given bugs."""
-    def __call__(self, args):
-        message = editor.input('Enter your comment.') if args.message is True \
-            else args.message
-        resolution = None
-        if args.resolution:
-            resolution = args.resolution.upper()
-        elif args.choose_resolution:
-            values = filter(
-                lambda x: x['name'] == 'resolution',
-                self.bz.get_fields()
-            )[0]['values']
-            values = sorted(values, None, lambda x: int(x['sortkey']))
-            values = filter(None, map(lambda x: x['name'], values))
-            resolution = self.ui.choose('Choose a resolution', values)
-        return map(
-            lambda x: self.bz.bug(x).set_status(
-                'CLOSED',
-                resolution=resolution,
-                comment=message
-            ),
-            args.bugs
-        )
-
-
-@with_bugs
 @with_message
 class Comment(Command):
     """Add a comment to the given bugs."""
@@ -259,24 +240,6 @@ class Fields(Command):
 
 
 @with_bugs
-@with_optional_message
-class Fix(Command):
-    """Mark the given bugs fixed."""
-
-    def __call__(self, args):
-        message = editor.input('Enter your comment.') if args.message is True \
-            else args.message
-        return map(
-            lambda x: self.bz.bug(x).set_status(
-                'RESOLVED',
-                resolution='FIXED',
-                comment=message
-            ),
-            args.bugs
-        )
-
-
-@with_bugs
 class Info(Command):
     """Show detailed information about the given bugs."""
     def __call__(self, args):
@@ -323,41 +286,57 @@ class Products(Command):
 
 
 @with_bugs
-@with_optional_message
-class Reopen(Command):
-    """Reopen the given bugs."""
-    def __call__(self, args):
-        message = editor.input('Enter your comment.') if args.message is True \
-            else args.message
-        return map(
-            lambda x: self.bz.bug(x).set_status('REOPENED', comment=message),
-            args.bugs
-        )
-
-
-@with_bugs
-@with_optional_message
+@with_status
 @with_resolution
-class Resolve(Command):
-    """Resolve the given bugs."""
-
+@with_optional_message
+class Status(Command):
+    """Set the status of the given bugs."""
     def __call__(self, args):
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
-        if args.resolution:
-            resolution = args.resolution.upper()
+
+        # get the values of the 'bug_status' field
+        values = filter(
+            lambda x: x['name'] == 'bug_status',
+            self.bz.get_fields()
+        )[0]['values']
+        values = sorted(values, None, lambda x: int(x['sortkey']))
+
+        if args.status:
+            status = args.status.upper()
         else:
-            # choose resolution
-            values = filter(
-                lambda x: x['name'] == 'resolution',
-                self.bz.get_fields()
-            )[0]['values']
-            values = sorted(values, None, lambda x: int(x['sortkey']))
-            values = filter(None, map(lambda x: x['name'], values))
-            resolution = self.ui.choose('Choose a resolution', values)
+            # choose status
+            status = self.ui.choose(
+                'Choose a status',
+                filter(None, map(lambda x: x['name'], values))
+            )
+
+        # check if the new status is "open"
+        try:
+            value = filter(lambda x: x['name'] == status, values)[0]
+            is_open = value['is_open']
+        except IndexError:
+            # no value matching the chosen status
+            raise UserWarning("Invalid status:", status)
+
+        resolution = None
+        if not is_open:
+            # resolution required
+            if args.resolution:
+                resolution = args.resolution.upper()
+            else:
+                # choose resolution
+                values = filter(
+                    lambda x: x['name'] == 'resolution',
+                    self.bz.get_fields()
+                )[0]['values']
+                values = sorted(values, None, lambda x: int(x['sortkey']))
+                values = filter(None, map(lambda x: x['name'], values))
+                resolution = self.ui.choose('Choose a resolution', values)
+
         return map(
             lambda x: self.bz.bug(x).set_status(
-                'RESOLVED',
+                status=status,
                 resolution=resolution,
                 comment=message
             ),
