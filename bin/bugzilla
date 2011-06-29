@@ -44,6 +44,18 @@ for command in bzlib.command.commands:
     map(lambda x: x(command_parser), command.args)
     command_parser.set_defaults(command=command)
 
+# alias
+aliases = bzlib.config.get('alias')
+try:
+    # replace command alias with canonical command and args
+    sys.argv[1:2] = aliases[sys.argv[1]].split()
+except TypeError:
+    # aliases is (presumably) None, i.e., no config
+    pass
+except KeyError:
+    # no such alias
+    pass
+
 # parse args
 args = parser.parse_args()
 
