@@ -41,13 +41,7 @@ config = read_config()
 def get(key):
     if not config:
         return None
-    try:
-        return config[key]
-    except KeyError:
-        try:
-            return default[key]
-        except KeyError:
-            return None
+    return config.get(key) or default.get(key)
 
 
 def get_show_fields():
