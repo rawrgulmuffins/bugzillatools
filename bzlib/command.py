@@ -353,4 +353,4 @@ class Status(Command):
 commands = sorted(filter(
     lambda x: type(x) == type and issubclass(x, Command) and x is not Command,
     locals().viewvalues()
-))
+), None, lambda x: x.__name__)
