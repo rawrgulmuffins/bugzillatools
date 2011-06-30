@@ -27,30 +27,17 @@ import bzlib.ui
 
 # process user-defined aliases
 aliases = bzlib.config.get('alias')
-try:
-    # replace command alias with canonical command and args
-    # TODO if the alias does not appear as the first arg, this doesn't
-    # work.  Need partial parsing later on anyway, for per-server aliases,
-    # so perhaps a partial-parse after the global args are added, followed
-    # by alias replacement, then add the subcommands and do a full
-    # parse
-    sys.argv[1:2] = aliases[sys.argv[1]].split()
-except TypeError:
-    # aliases is (presumably) None, i.e., no config
-    pass
-except KeyError:
-    # no such alias
-    pass
-except IndexError:
-    # no arguments supplied
-    pass
+if aliases:
+    for i, arg in enumerate(sys.argv[1:], 1):
+        if arg in aliases:
+            sys.argv[i:i+1] = aliases[arg].split()
+            break
 
 # format the epilogue
 epilog = None
 if aliases:
-    width = max(map(len, aliases.viewkeys())) + 1
     lines = map(
-        lambda (alias, target): "    {:{}}   {}".format(alias, width, target),
+        lambda (alias, target): "    {:20}{}".format(alias, target),
         aliases.viewitems()
     )
     epilog = 'user-defined aliases:\n' + '\n'.join(lines)
