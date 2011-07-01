@@ -102,6 +102,17 @@ def with_resolution(cls):
     return cls
 
 
+def with_limit(things='items', default=None):
+    def decorator(cls):
+        cls.args = cls.args + [
+            lambda x: x.add_argument('--limit', '-l', type=int,
+                default=default, metavar='N',
+                help='Limit output to N {}.'.format(things))
+        ]
+        return cls
+    return decorator
+
+
 class Command(object):
     """A command object.
 
@@ -215,6 +226,7 @@ class CC(Command):
 
 @with_bugs
 @with_optional_message
+@with_limit(things='comments')
 class Comment(Command):
     """List comments or file a comment on the given bugs."""
     args = [
@@ -235,7 +247,19 @@ class Comment(Command):
             map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
         else:
             def cmtfmt(bug):
-                comments = enumerate(self.bz.bug(bug).get_comments())
+                comments = sorted(
+                    enumerate(self.bz.bug(bug).get_comments()),
+                    key=lambda x: int(x[1]['id']),
+                    reverse=True  # initially reverse to apply limit
+                )
+
+                # apply limit, if one given
+                comments = comments[:abs(args.limit)] \
+                    if args.limit else comments
+
+                # re-reverse if reversed comments were /not/ wanted
+                comments = reversed(comments) if not args.reverse else comments
+
                 return '=====\nBUG {}\n\n-----\n{}'.format(
                     bug,
                     '-----\n'.join(map(
@@ -243,11 +267,7 @@ class Comment(Command):
                             'comment: {}'.format(n) if n else 'description',
                             **x
                         ),
-                        sorted(
-                            comments,
-                            key=lambda x: int(x[1]['id']),
-                            reverse=args.reverse
-                        )
+                        comments
                     ))
                 )
             print '\n'.join(map(cmtfmt, args.bugs))
