@@ -12,6 +12,9 @@ setup(
     url='https://gitorious.org/bugzillatools',
     packages=['bzlib'],
     scripts=['bin/bugzilla'],
+    data_files=[
+        ('doc/bugzillatools', ['doc/.bugzillarc.sample']),
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
