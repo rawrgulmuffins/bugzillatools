@@ -184,6 +184,40 @@ class Comment(Command):
         map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
 
 
+@with_bugs
+class Comments(Command):
+    """List the given bugs' comments."""
+    args = [
+        lambda x: x.add_argument('--reverse', action='store_true',
+            default=True,
+            help='Show from newest to oldest.'),
+        lambda x: x.add_argument('--forward', action='store_false',
+            dest='reverse',
+            help='Show from oldest to newest.'),
+    ]
+
+    formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
+
+    def __call__(self, args):
+        def cmtfmt(bug):
+            comments = enumerate(self.bz.bug(bug).get_comments())
+            return '=====\nBUG {}\n\n-----\n{}'.format(
+                bug,
+                '-----\n'.join(map(
+                    lambda (n, x): self.formatstring.format(
+                        'comment: {}'.format(n) if n else 'description',
+                        **x
+                    ),
+                    sorted(
+                        comments,
+                        key=lambda x: int(x[1]['id']),
+                        reverse=args.reverse
+                    )
+                ))
+            )
+        print '\n'.join(map(cmtfmt, args.bugs))
+
+
 @with_set('given bugs', 'depdendencies', metavar='BUG', type=int)
 @with_add_remove('given bugs', 'depdendencies', metavar='BUG', type=int)
 @with_bugs
