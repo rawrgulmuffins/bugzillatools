@@ -184,3 +184,23 @@ class Bug(object):
         self.data = None  # data is stale
         if comment:
             self.comments = None  # comments are stale
+
+    def update_cc(self, add=None, remove=None, comment=None):
+        """Update the CC list of the given bugs.
+
+        Accepts arrays of valid user names.
+        """
+        cc = {}
+        if add:
+            cc['add'] = add
+        if remove:
+            cc['remove'] = remove
+        if not cc:
+            return  # nothing to do
+        kwargs = {'cc': cc}
+        if comment:
+            kwargs['comment'] = {'body': comment}
+        self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if comment:
+            self.comments = None  # comments are stale
