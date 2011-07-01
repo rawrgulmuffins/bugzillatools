@@ -175,6 +175,44 @@ class Block(Command):
                     print '  No blocked bugs'
 
 
+@with_add_remove('given users', 'CC List', metavar='USER')
+@with_bugs
+@with_optional_message
+class CC(Command):
+    """Show or update CC List."""
+    def __call__(self, args):
+        bugs = map(self.bz.bug, args.bugs)
+        if args.add or args.remove:
+            # get actual users
+            getuser = lambda x: self.bz.match_one_user(x)['name']
+            add = map(getuser, args.add) if args.add else None
+            remove = map(getuser, args.remove) if args.remove else None
+
+            # get message
+            message = editor.input('Enter your comment.') \
+                if args.message is True else args.message
+
+            # update CC list
+            map(
+                lambda x: self.bz.bug(x).update_cc(
+                    add=add,
+                    remove=remove,
+                    comment=message
+                ),
+                args.bugs
+            )
+        else:
+            # show CC List
+            for bug in bugs:
+                bug.read()
+                print 'Bug {}:'.format(bug.bugno)
+                if bug.data['cc']:
+                    print '  CC List: {}'.format(
+                        ', '.join(map(str, bug.data['cc'])))
+                else:
+                    print '  0 users'
+
+
 @with_bugs
 @with_message
 class Comment(Command):
