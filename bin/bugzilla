@@ -50,6 +50,8 @@ parser = argparse.ArgumentParser(
 )
 
 # add global arguments
+parser.add_argument('--version', action='version',
+    version='%(prog)s {}'.format(bzlib.version))
 parser.add_argument('--server', default=bzlib.config.get('default_server'),
     help='Handle of Bugzilla instance to use')
 parser.add_argument('--url', help='Base URL of Bugzilla instance')

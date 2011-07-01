@@ -1,11 +1,14 @@
-from distutils.core import setup
+import distutils.core
+import sys
+
+import bzlib  # import version info
 
 with open('README') as fh:
     long_description = fh.read()
 
-setup(
+distutils.core.setup(
     name='bugzillatools',
-    version='0.1.2',
+    version=bzlib.version,
     description='Bugzilla CLI client and XML-RPC interface library',
     author='Fraser Tweedale',
     author_email='frasert@jumbolotteries.com',
