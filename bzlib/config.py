@@ -28,7 +28,7 @@ default = {}
 
 
 def read_config():
-    f = os.path.expanduser('~/.bugrc')
+    f = os.path.expanduser('~/.bugzillarc')
     if not os.path.isfile(f):
         # file doesn't exist; empty config
         return None
