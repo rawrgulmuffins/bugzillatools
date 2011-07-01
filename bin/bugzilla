@@ -73,22 +73,18 @@ args = parser.parse_args()
 # construct the Bugzilla object
 url, user, password = args.url, args.user, args.password
 if not (url and user and password):
+    if not args.server:
+        raise UserWarning("No server specified.")
     try:
-        _url, _user, _password = bzlib.config.get('servers')[args.server]
-        url = url or _url
-        user = user or _user
-        password = password or _password
-    except TypeError:
-        # no 'servers' config
-        sys.exit("No servers are defined.")
-    except KeyError:
-        # no specified server (None) or no config for specified server
-        if not args.server:
-            sys.exit("No server specified.")
-        else:
-            sys.exit("No configuration for server '{}'.".format(args.server))
+        server = bzlib.config.get('servers').get(args.server)
+    except AttributeError:
+        raise UserWarning("No servers defined.")
+    if not server:
+        raise UserWarning("No configuration for server '" + args.server + "'.")
+    url = url or server[0]
+    user = user or server[1]
+    password = password or server[2]
 
-    url = args.url or url
 bz = bzlib.bugzilla.Bugzilla(url, user, password)
 
 # execute command
