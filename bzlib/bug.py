@@ -84,6 +84,10 @@ class Bug(object):
         result = self.rpc('create', **self.data)
         self.bugno = result['id']
 
+    def get_comments(self):
+        self.read_comments()
+        return self.comments
+
     def add_comment(self, comment):
         self.rpc('add_comment', id=self.bugno, comment=comment)
         self.comments = None  # comments are stale
