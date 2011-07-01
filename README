@@ -14,8 +14,10 @@ Requires Python 2.7 and works with Bugzilla 4.0 or later.
     Assign bugs to the given user.
   ``block``
     List or update bug dependencies.
+  ``cc``
+    Show or update CC List.
   ``comment``
-    Add a comment to the given bugs.
+    List comments or file a comment on the given bugs.
   ``depend``
     List or update bug dependencies.
   ``fields``
