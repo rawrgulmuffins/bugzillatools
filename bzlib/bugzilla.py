@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import xmlrpclib
 
 from . import bug
@@ -40,8 +39,9 @@ class Bugzilla(object):
         self.user = user
         self.password = password
 
-        match = re.match('http://.*?/', url)
-        self.server = xmlrpclib.ServerProxy(match.group(0) + 'xmlrpc.cgi')
+        # TODO URL sanity checks
+        url = url[:-1] if url[-1] == '/' else url  # strip trailing slash
+        self.server = xmlrpclib.ServerProxy(url + '/xmlrpc.cgi')
 
     def rpc(self, *args, **kwargs):
         """Do an RPC on the Bugzilla server.
