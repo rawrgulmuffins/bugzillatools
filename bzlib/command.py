@@ -214,17 +214,9 @@ class CC(Command):
 
 
 @with_bugs
-@with_message
+@with_optional_message
 class Comment(Command):
-    """Add a comment to the given bugs."""
-    def __call__(self, args):
-        message = args.message or editor.input('Enter your comment.')
-        map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
-
-
-@with_bugs
-class Comments(Command):
-    """List the given bugs' comments."""
+    """List comments or file a comment on the given bugs."""
     args = [
         lambda x: x.add_argument('--reverse', action='store_true',
             default=True,
@@ -237,23 +229,28 @@ class Comments(Command):
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
 
     def __call__(self, args):
-        def cmtfmt(bug):
-            comments = enumerate(self.bz.bug(bug).get_comments())
-            return '=====\nBUG {}\n\n-----\n{}'.format(
-                bug,
-                '-----\n'.join(map(
-                    lambda (n, x): self.formatstring.format(
-                        'comment: {}'.format(n) if n else 'description',
-                        **x
-                    ),
-                    sorted(
-                        comments,
-                        key=lambda x: int(x[1]['id']),
-                        reverse=args.reverse
-                    )
-                ))
-            )
-        print '\n'.join(map(cmtfmt, args.bugs))
+        message = editor.input('Enter your comment.') \
+            if args.message is True else args.message
+        if message:
+            map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
+        else:
+            def cmtfmt(bug):
+                comments = enumerate(self.bz.bug(bug).get_comments())
+                return '=====\nBUG {}\n\n-----\n{}'.format(
+                    bug,
+                    '-----\n'.join(map(
+                        lambda (n, x): self.formatstring.format(
+                            'comment: {}'.format(n) if n else 'description',
+                            **x
+                        ),
+                        sorted(
+                            comments,
+                            key=lambda x: int(x[1]['id']),
+                            reverse=args.reverse
+                        )
+                    ))
+                )
+            print '\n'.join(map(cmtfmt, args.bugs))
 
 
 @with_set('given bugs', 'depdendencies', metavar='BUG', type=int)
