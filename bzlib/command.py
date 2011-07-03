@@ -158,7 +158,7 @@ class Assign(Command):
 @with_bugs
 @with_optional_message
 class Block(Command):
-    """List or update bug dependencies."""
+    """Show or update block list of given bugs."""
     def __call__(self, args):
         bugs = map(self.bz.bug, args.bugs)
         if args.add or args.remove or args.set:
@@ -278,7 +278,7 @@ class Comment(Command):
 @with_bugs
 @with_optional_message
 class Depend(Command):
-    """List or update bug dependencies."""
+    """Show or update dependencies of given bugs."""
     def __call__(self, args):
         bugs = map(self.bz.bug, args.bugs)
         if args.add or args.remove or args.set:
@@ -345,7 +345,7 @@ class Info(Command):
 
 @with_bugs
 class List(Command):
-    """Show a one-line summary of given given bugs."""
+    """Show a one-line summary of the given bugs."""
     def __call__(self, args):
         fields = config.get_show_fields()
         lens = map(lambda x: len(str(x)), args.bugs)
