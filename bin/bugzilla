@@ -74,6 +74,7 @@ class Help():
 
 # add subcommands
 parser = argparse.ArgumentParser(
+    parents=[_parser],
     description='Interact with Bugzilla servers.',
     epilog=epilog,
     formatter_class=argparse.RawDescriptionHelpFormatter
