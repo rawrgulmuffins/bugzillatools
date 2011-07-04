@@ -18,6 +18,7 @@ import argparse
 import itertools
 import textwrap
 
+from . import bugzilla
 from . import config
 from . import editor
 
@@ -180,7 +181,7 @@ class BugzillaCommand(Command):
             if not args.server:
                 raise UserWarning("No server specified.")
             try:
-                server = bzlib.config.get('servers').get(args.server)
+                server = config.get('servers').get(args.server)
             except AttributeError:
                 raise UserWarning("No servers defined.")
             if not server:
@@ -190,12 +191,12 @@ class BugzillaCommand(Command):
             url = url or server[0]
             user = user or server[1]
             password = password or server[2]
-        self.bz = bzlib.bugzilla.Bugzilla(url, user, password)
+        self.bz = bugzilla.Bugzilla(url, user, password)
 
 
 @with_bugs
 @with_optional_message
-class Assign(Command):
+class Assign(BugzillaCommand):
     """Assign bugs to the given user."""
     args = [
         lambda x: x.add_argument('--to', metavar='ASSIGNEE',
@@ -216,7 +217,7 @@ class Assign(Command):
 @with_add_remove('given bugs', 'blocked bugs', metavar='BUG', type=int)
 @with_bugs
 @with_optional_message
-class Block(Command):
+class Block(BugzillaCommand):
     """Show or update block list of given bugs."""
     def __call__(self):
         args = self._args
@@ -249,7 +250,7 @@ class Block(Command):
 @with_add_remove('given users', 'CC List', metavar='USER')
 @with_bugs
 @with_optional_message
-class CC(Command):
+class CC(BugzillaCommand):
     """Show or update CC List."""
     def __call__(self):
         args = self._args
@@ -288,7 +289,7 @@ class CC(Command):
 @with_bugs
 @with_optional_message
 @with_limit(things='comments')
-class Comment(Command):
+class Comment(BugzillaCommand):
     """List comments or file a comment on the given bugs."""
     args = [
         lambda x: x.add_argument('--reverse', action='store_true',
@@ -339,7 +340,7 @@ class Comment(Command):
 @with_add_remove('given bugs', 'depdendencies', metavar='BUG', type=int)
 @with_bugs
 @with_optional_message
-class Depend(Command):
+class Depend(BugzillaCommand):
     """Show or update dependencies of given bugs."""
     def __call__(self):
         args = self._args
@@ -369,7 +370,7 @@ class Depend(Command):
                     print '  No dependencies'
 
 
-class Fields(Command):
+class Fields(BugzillaCommand):
     """List valid values for bug fields."""
     def __call__(self):
         args = self._args
@@ -393,7 +394,7 @@ class Fields(Command):
 
 
 @with_bugs
-class Info(Command):
+class Info(BugzillaCommand):
     """Show detailed information about the given bugs."""
     def __call__(self):
         args = self._args
@@ -409,7 +410,7 @@ class Info(Command):
 
 
 @with_bugs
-class List(Command):
+class List(BugzillaCommand):
     """Show a one-line summary of the given bugs."""
     def __call__(self):
         args = self._args
@@ -423,12 +424,12 @@ class List(Command):
             )
 
 
-#class New(Command):
+#class New(BugzillaCommand):
 #    """File a new bug."""
 #    pass
 
 
-class Products(Command):
+class Products(BugzillaCommand):
     """List the products of a Bugzilla instance."""
     def __call__(self):
         args = self._args
@@ -445,7 +446,7 @@ class Products(Command):
 @with_status
 @with_resolution
 @with_optional_message
-class Status(Command):
+class Status(BugzillaCommand):
     """Set the status of the given bugs."""
     def __call__(self):
         args = self._args
@@ -501,7 +502,7 @@ class Status(Command):
         )
 
 
-#class Search(Command):
+#class Search(BugzillaCommand):
 #    """Search for bugs with supplied attributes."""
 #    pass
 
