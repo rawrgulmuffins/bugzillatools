@@ -18,9 +18,7 @@
 
 
 import argparse
-import itertools
 
-import bzlib.bugzilla
 import bzlib.command
 import bzlib.config
 import bzlib.ui
@@ -51,27 +49,6 @@ _parser.add_argument('--password', help='Bugzilla password')
 # parse known args
 args, argv = _parser.parse_known_args()
 
-# declare help command
-class Help():
-    """Show help."""
-    args = [
-        lambda x: x.add_argument('subcommand', nargs='?',
-            help='show help for subcommand')
-    ]
-    def __call__(self, args, commands):
-        if not args.subcommand:
-            parser.parse_args(['--help'])
-        else:
-            if args.subcommand in aliases:
-                print "'{}': alias for {}".format(
-                    args.subcommand,
-                    aliases[args.subcommand]
-                )
-            elif args.subcommand not in commands:
-                print "unknown subcommand: '{}'".format(args.subcommand)
-            else:
-                parser.parse_args([args.subcommand, '--help'])
-
 # add subcommands
 parser = argparse.ArgumentParser(
     parents=[_parser],
@@ -80,10 +57,11 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter
 )
 subparsers = parser.add_subparsers(title='subcommands')
-commands = {x.__name__.lower(): x \
-    for x in itertools.chain(bzlib.command.commands, [Help])}
-for name, command in commands.viewitems():
-    command_parser = subparsers.add_parser(name, help=command.__doc__)
+commands = {x.__name__.lower(): x for x in bzlib.command.commands}
+for name, command in sorted(commands.viewitems(), key=lambda x: x[0]):
+    command_parser = subparsers.add_parser(name,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help=command.help(), epilog=command.epilog())
     map(lambda x: x(command_parser), command.args)
     command_parser.set_defaults(command=command)
 
@@ -100,27 +78,6 @@ for i, arg in enumerate(argv):
 # parse remaining args
 args = parser.parse_args(args=argv, namespace=args)
 
-if issubclass(args.command, bzlib.command.Command):
-    # a bugzilla command
-    # construct the Bugzilla object
-    url, user, password = args.url, args.user, args.password
-    if not (url and user and password):
-        if not args.server:
-            raise UserWarning("No server specified.")
-        try:
-            server = bzlib.config.get('servers').get(args.server)
-        except AttributeError:
-            raise UserWarning("No servers defined.")
-        if not server:
-            raise UserWarning("No configuration for server '" + args.server + "'.")
-        url = url or server[0]
-        user = user or server[1]
-        password = password or server[2]
-
-    bz = bzlib.bugzilla.Bugzilla(url, user, password)
-
-    # execute command
-    args.command(bz, bzlib.ui.UI())(args)
-else:
-    # the Help command
-    args.command()(args, commands)
+# execute command
+ui = bzlib.ui.UI()
+args.command(args, parser, commands, aliases, ui)()

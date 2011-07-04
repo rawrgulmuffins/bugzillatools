@@ -10,7 +10,7 @@ Requires Python 2.7 and works with Bugzilla 4.0 or later.
 ------------
 
 Command-line application for interacting with Bugzilla servers.
-Implemented actions include:
+The following subcommands are available:
 
 :assign: Assign bugs to the given user.
 :block: Show or update block list of given bugs.
@@ -18,6 +18,7 @@ Implemented actions include:
 :comment: List comments or file a comment on the given bugs.
 :depend: Show or update dependencies of given bugs.
 :fields: List valid values for bug fields.
+:help: Show help.
 :info: Show detailed information about the given bugs.
 :list: Show a one-line summary of the given bugs.
 :products: List the products of a Bugzilla instance.

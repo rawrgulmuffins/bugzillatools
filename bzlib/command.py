@@ -16,6 +16,7 @@
 
 import argparse
 import itertools
+import textwrap
 
 from . import config
 from . import editor
@@ -125,14 +126,71 @@ class Command(object):
     """
     args = []
 
-    def __init__(self, bugzilla, ui):
-        """Initialise the Command object."""
-        self.bz = bugzilla
-        self.ui = ui
+    @classmethod
+    def help(cls):
+        return textwrap.dedent(filter(None, cls.__doc__.splitlines())[0])
 
-    def __call__(self, *args, **kwargs):
-        """To be implemented by subclasses."""
-        raise NotImplementedError
+    @classmethod
+    def epilog(cls):
+        return textwrap.dedent('\n\n'.join(cls.__doc__.split('\n\n')[1:]))
+
+    def __init__(self, args, parser, commands, aliases, ui):
+        """
+        args: an argparse.Namespace
+        parser: the argparse.ArgumentParser
+        commands: a dict of all Command classes keyed by __name__.lower()
+        aliases: a dict of aliases keyed by alias
+        """
+        self._args = args
+        self._parser = parser
+        self._commands = commands
+        self._aliases = aliases
+        self._ui = ui
+
+
+class Help(Command):
+    """Show help."""
+    args = [
+        lambda x: x.add_argument('subcommand', metavar='SUBCOMMAND', nargs='?',
+            help='show help for subcommand')
+    ]
+
+    def __call__(self):
+        if not self._args.subcommand:
+            self._parser.parse_args(['--help'])
+        else:
+            if self._args.subcommand in self._aliases:
+                print "'{}': alias for {}".format(
+                    self._args.subcommand,
+                    self._aliases[self._args.subcommand]
+                )
+            elif self._args.subcommand not in self._commands:
+                print "unknown subcommand: '{}'".format(self._args.subcommand)
+            else:
+                self._parser.parse_args([self._args.subcommand, '--help'])
+
+
+class BugzillaCommand(Command):
+    def __init__(self, *args, **kwargs):
+        super(BugzillaCommand, self).__init__(*args, **kwargs)
+        # construct the Bugzilla object
+        args = self._args
+        url, user, password = args.url, args.user, args.password
+        if not (url and user and password):
+            if not args.server:
+                raise UserWarning("No server specified.")
+            try:
+                server = bzlib.config.get('servers').get(args.server)
+            except AttributeError:
+                raise UserWarning("No servers defined.")
+            if not server:
+                raise UserWarning(
+                    "No configuration for server '{}'.".format(args.server)
+                )
+            url = url or server[0]
+            user = user or server[1]
+            password = password or server[2]
+        self.bz = bzlib.bugzilla.Bugzilla(url, user, password)
 
 
 @with_bugs
@@ -144,7 +202,8 @@ class Assign(Command):
             help='New assignee'),
     ]
 
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
         return map(
@@ -159,7 +218,8 @@ class Assign(Command):
 @with_optional_message
 class Block(Command):
     """Show or update block list of given bugs."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         bugs = map(self.bz.bug, args.bugs)
         if args.add or args.remove or args.set:
             message = editor.input('Enter your comment.') \
@@ -191,7 +251,8 @@ class Block(Command):
 @with_optional_message
 class CC(Command):
     """Show or update CC List."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         bugs = map(self.bz.bug, args.bugs)
         if args.add or args.remove:
             # get actual users
@@ -240,7 +301,8 @@ class Comment(Command):
 
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
 
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         message = editor.input('Enter your comment.') \
             if args.message is True else args.message
         if message:
@@ -279,7 +341,8 @@ class Comment(Command):
 @with_optional_message
 class Depend(Command):
     """Show or update dependencies of given bugs."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         bugs = map(self.bz.bug, args.bugs)
         if args.add or args.remove or args.set:
             message = editor.input('Enter your comment.') \
@@ -308,7 +371,8 @@ class Depend(Command):
 
 class Fields(Command):
     """List valid values for bug fields."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         fields = filter(lambda x: 'values' in x, self.bz.get_fields())
         for field in fields:
             keyfn = lambda x: x['visibility_values']
@@ -331,7 +395,8 @@ class Fields(Command):
 @with_bugs
 class Info(Command):
     """Show detailed information about the given bugs."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         fields = config.get_show_fields()
         for bug in map(self.bz.bug, args.bugs):
             bug.read()
@@ -346,7 +411,8 @@ class Info(Command):
 @with_bugs
 class List(Command):
     """Show a one-line summary of the given bugs."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         fields = config.get_show_fields()
         lens = map(lambda x: len(str(x)), args.bugs)
         width = max(lens) - min(lens) + 2
@@ -364,7 +430,8 @@ class List(Command):
 
 class Products(Command):
     """List the products of a Bugzilla instance."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         ids = self.bz.rpc('Product', 'get_accessible_products')['ids']
         products = self.bz.rpc('Product', 'get', ids=ids)['products']
         width = max(map(lambda x: len(x['name']), products)) + 1
@@ -380,7 +447,8 @@ class Products(Command):
 @with_optional_message
 class Status(Command):
     """Set the status of the given bugs."""
-    def __call__(self, args):
+    def __call__(self):
+        args = self._args
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
 
@@ -395,7 +463,7 @@ class Status(Command):
             status = args.status.upper()
         else:
             # choose status
-            status = self.ui.choose(
+            status = self._ui.choose(
                 'Choose a status',
                 filter(None, map(lambda x: x['name'], values))
             )
@@ -421,7 +489,7 @@ class Status(Command):
                 )[0]['values']
                 values = sorted(values, None, lambda x: int(x['sortkey']))
                 values = filter(None, map(lambda x: x['name'], values))
-                resolution = self.ui.choose('Choose a resolution', values)
+                resolution = self._ui.choose('Choose a resolution', values)
 
         return map(
             lambda x: self.bz.bug(x).set_status(
@@ -439,7 +507,9 @@ class Status(Command):
 
 
 # the list got too long; metaprogram it ^_^
-commands = sorted(filter(
-    lambda x: type(x) == type and issubclass(x, Command) and x is not Command,
+commands = filter(
+    lambda x: type(x) == type                     # is a class \
+        and issubclass(x, Command)                # is a Command \
+        and x not in [Command, BugzillaCommand],  # not abstract
     locals().viewvalues()
-), None, lambda x: x.__name__)
+)
