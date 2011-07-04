@@ -34,7 +34,7 @@ lines = map(
     lambda (alias, target): "    {:20}{}".format(alias, target),
     aliases.viewitems()
 )
-epilog = 'user-defined aliases:\n' + '\n'.join(lines)
+epilog = 'user-defined aliases:\n' + '\n'.join(lines) if lines else None
 
 # create an argument parser
 _parser = argparse.ArgumentParser(add_help=False)
