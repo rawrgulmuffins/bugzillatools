@@ -1,0 +1,82 @@
+bugzillatools-0.2.1dev ::
+==================================================
+
+Bug fixes
+---------
+
+- Support Unicode data in all commands.
+- Do not show 'aliases' heading in ``--help`` output if none defined.
+- Add global arguments to subcommand ``--help`` output.
+
+
+bugzillatools-0.2 :: Sat Jul 2 00:20:27 2011 +1000
+==================================================
+
+New features
+------------
+
+- ``comment`` now lists bug comments when no comment is given.
+  ``--forward``, ``--reverse`` and ``--limit=N`` can be used to control
+  output.
+- ``depend`` and ``block`` commands: show or update bug dependency
+  relationships.
+- ``cc`` command: Show or update CC List.
+- ``fields`` command: List valid values for bug fields.
+- ``help`` command: Show help for a command, or the top-level help if
+  no argument is given.
+- ``--version`` prints bugzillatools version.
+- Invoke EDITOR for comment input when comment required but not
+  explicitly provided
+- User matching:  For commands that require usernames, instead of
+  providing full username, if a provided fragment matches a single user
+  that user will be used.
+- Command aliases: users can define their own aliases for commands and
+  command arguments.
+- Replace ``close``, ``fix``, ``reopen`` and ``resolve`` commands with the
+  single ``status`` command; commands to suit a particular workflow can be
+  defined as aliases of ``status``, with appropriate arguments.
+
+Bug fixes
+---------
+
+- Improved server misconfiguration or missing configuration handling.
+- List commands in alphabetical order.
+
+Other changes
+-------------
+
+- The default user configuration file changed to ``~/.bugzillarc``
+  (formerly ~/.bugrc).
+
+
+bugzillatools-0.1.2 :: Fri Jun 17 13:45:17 2011 +1000
+=====================================================
+
+Bug fixes
+---------
+
+- Fix Bugzilla construction args
+
+
+bugzillatools-0.1.1 :: Tue Jun 14 21:58:40 2011 +1000
+=====================================================
+
+New features
+------------
+
+- ``products`` command: list products of a Bugzilla.
+- Describe subcommands in ``--help`` output.
+
+Bug fixes
+---------
+
+- Handle server lookup failure when no servers are defined.
+
+
+bugzillatools-0.1 :: Sun Jun 12 12:56:26 2011 +1000
+===================================================
+
+New features
+------------
+
+- First release of bugzillatools
