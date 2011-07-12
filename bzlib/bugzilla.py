@@ -41,7 +41,8 @@ class Bugzilla(object):
 
         # TODO URL sanity checks
         url = url[:-1] if url[-1] == '/' else url  # strip trailing slash
-        self.server = xmlrpclib.ServerProxy(url + '/xmlrpc.cgi')
+        # httplib explodes if url is unicode
+        self.server = xmlrpclib.ServerProxy(str(url + '/xmlrpc.cgi'))
 
     def rpc(self, *args, **kwargs):
         """Do an RPC on the Bugzilla server.
