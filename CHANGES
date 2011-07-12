@@ -1,5 +1,5 @@
-bugzillatools-0.2.1dev ::
-==================================================
+bugzillatools-0.2.1 :: Tue Jul 12 2011
+======================================
 
 Bug fixes
 ---------
@@ -9,8 +9,8 @@ Bug fixes
 - Add global arguments to subcommand ``--help`` output.
 
 
-bugzillatools-0.2 :: Sat Jul 2 00:20:27 2011 +1000
-==================================================
+bugzillatools-0.2 :: Sat Jul 2 2011
+===================================
 
 New features
 ------------
@@ -49,8 +49,8 @@ Other changes
   (formerly ~/.bugrc).
 
 
-bugzillatools-0.1.2 :: Fri Jun 17 13:45:17 2011 +1000
-=====================================================
+bugzillatools-0.1.2 :: Fri Jun 17 2011
+======================================
 
 Bug fixes
 ---------
@@ -58,8 +58,8 @@ Bug fixes
 - Fix Bugzilla construction args
 
 
-bugzillatools-0.1.1 :: Tue Jun 14 21:58:40 2011 +1000
-=====================================================
+bugzillatools-0.1.1 :: Tue Jun 14 2011
+======================================
 
 New features
 ------------
@@ -73,8 +73,8 @@ Bug fixes
 - Handle server lookup failure when no servers are defined.
 
 
-bugzillatools-0.1 :: Sun Jun 12 12:56:26 2011 +1000
-===================================================
+bugzillatools-0.1 :: Sun Jun 12 2011
+====================================
 
 New features
 ------------
