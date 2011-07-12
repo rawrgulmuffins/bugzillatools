@@ -63,17 +63,6 @@ def with_bugs(cls):
     return cls
 
 
-def with_message(cls):
-    def msgargs(parser):
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument('-F', '--file', metavar='MSGFILE', dest='message',
-            type=argparse.FileType('r'), action=_ReadFileAction,
-            help='Take comment from this file')
-        group.add_argument('-m', '--message', help='Comment on the change')
-    cls.args = cls.args + [msgargs]
-    return cls
-
-
 def with_optional_message(cls):
     def msgargs(parser):
         group = parser.add_mutually_exclusive_group()
