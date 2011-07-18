@@ -92,6 +92,11 @@ class Bug(object):
         self.rpc('add_comment', id=self.bugno, comment=comment)
         self.comments = None  # comments are stale
 
+    def is_open(self):
+        """Return True if the bug is open, otherwise False."""
+        self.read()
+        return self.data['is_open']
+
     def set_status(self, status, resolution='', comment=None):
         """Set the status of this bug.
 
