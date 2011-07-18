@@ -468,13 +468,18 @@ class Status(BugzillaCommand):
             # no value matching the chosen status
             raise UserWarning("Invalid status:", status)
 
+        # instantiate bugs
+        bugs = map(self.bz.bug, args.bugs)
+
         resolution = None
         if not is_open:
-            # resolution required
+            # The new status accepts a resolution.
             if args.resolution:
+                # A resolution was supplied.
                 resolution = args.resolution.upper()
-            else:
-                # choose resolution
+            elif any(map(lambda x: x.is_open(), bugs)):
+                # A resolution was not supplied, but one is required since
+                # at least one of the bugs is currently open.  Choose one.
                 values = filter(
                     lambda x: x['name'] == 'resolution',
                     self.bz.get_fields()

@@ -1,3 +1,13 @@
+bugzillatools-0.2.2 :: ???
+==========================
+
+Bug fixes
+---------
+
+- ``status`` only prompts for resolution if new status is closed and current
+  status is open (``--resolution`` may still be specified, however.)
+
+
 bugzillatools-0.2.1 :: Tue Jul 12 2011
 ======================================
 
