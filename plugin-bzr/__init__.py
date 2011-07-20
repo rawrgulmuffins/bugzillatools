@@ -26,18 +26,12 @@ import bzrlib.api
 import bzrlib.commands
 import bzrlib.trace
 
+import bzlib
+
 from . import hooks
 
 # plugin setup
-# TODO use bzlib version info
-bzr_plugin_name = 'bugzilla'
-version_info = (0, 6, 0, 'dev', 0)
-
-if version_info[3] == 'final':
-    version_string = '%d.%d.%d' % version_info[:3]
-else:
-    version_string = '%d.%d.%d%s%d' % version_info
-__version__ = version_string
+version_info = bzlib.version_info
 
 COMPATIBLE_BZR_VERSIONS = [
     (2, 0, 0),
