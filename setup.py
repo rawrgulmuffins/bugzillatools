@@ -9,11 +9,15 @@ with open('README') as fh:
 distutils.core.setup(
     name='bugzillatools',
     version=bzlib.version,
-    description='Bugzilla CLI client and XML-RPC interface library',
+    description='Bugzilla CLI client, XML-RPC binding and VCS plugins',
     author='Fraser Tweedale',
     author_email='frasert@jumbolotteries.com',
     url='https://gitorious.org/bugzillatools',
-    packages=['bzlib'],
+    packages=['bzlib', 'bzrlib.plugins.bugzillatools'],
+    package_dir={
+        'bzlib': 'bzlib',
+        'bzrlib.plugins.bugzillatools': 'plugin-bzr',
+    },
     scripts=['bin/bugzilla'],
     data_files=[
         ('doc/bugzillatools', ['doc/.bugzillarc.sample']),
