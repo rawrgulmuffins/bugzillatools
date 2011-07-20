@@ -43,6 +43,7 @@ COMPATIBLE_BZR_VERSIONS = [
     (2, 0, 0),
     (2, 1, 0),
     (2, 2, 0),
+    (2, 3, 0),
 ]
 
 bzrlib.api.require_any_api(bzrlib, COMPATIBLE_BZR_VERSIONS)
