@@ -42,9 +42,9 @@ COMPATIBLE_BZR_VERSIONS = [
 
 bzrlib.api.require_any_api(bzrlib, COMPATIBLE_BZR_VERSIONS)
 
-if __name__ != 'bzrlib.plugins.bugzilla':
+if __name__ != 'bzrlib.plugins.bugzillatools':
     bzrlib.trace.warning(
-        'Not running as bzrlib.plugins.bugzilla; things may break.')
+        'Not running as bzrlib.plugins.bugzillatools; things may break.')
 
 # install the get_command hook
 bzrlib.commands.Command.hooks.install_named_hook(
