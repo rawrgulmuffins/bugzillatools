@@ -4,16 +4,16 @@ bugzillatools-0.2.2 :: ???
 New features
 ------------
 
-- Added the Bazaar plugin
+- Added the Bazaar plugin.
+- ``status`` learned the ``--dupe-of`` argument; this is all that's needed
+  to mark a bug as a duplicate of another (Bugzilla with automatically set
+  the status and resolution fields to appropriate values).
 
 Bug fixes
 ---------
 
 - ``status`` only prompts for resolution if new status is closed and current
   status is open (``--resolution`` may still be specified, however.)
-- ``status`` learned the ``--dupe-of`` argument; this is all that's needed
-  to mark a bug as a duplicate of another (Bugzilla with automatically set
-  the status and resolution fields to appropriate values).
 - The unused ``--choose-status`` and ``--choose-resolution`` arguments were
   removed from ``status``.
 
