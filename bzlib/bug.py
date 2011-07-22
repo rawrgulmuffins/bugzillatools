@@ -97,6 +97,16 @@ class Bug(object):
         self.read()
         return self.data['is_open']
 
+    def set_dupe_of(self, bug, comment=None):
+        """Set this bug a duplicate of the given bug."""
+        kwargs = {'dupe_of': bug}
+        if comment:
+            kwargs['comment'] = {'body': comment}
+        self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if comment:
+            self.comments = None  # comments are stale
+
     def set_status(self, status, resolution='', comment=None):
         """Set the status of this bug.
 
