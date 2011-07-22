@@ -438,11 +438,43 @@ class Products(BugzillaCommand):
 @with_resolution
 @with_optional_message
 class Status(BugzillaCommand):
-    """Set the status of the given bugs."""
+    """Set the status of the given bugs.
+
+    Description
+    -----------
+
+    The ``status`` command is used to update the status and resolution of
+    bugs.  Status is given with the ``--status`` argument.
+
+    If the status is changing from one considered "open" to one not
+    considered "open", a resolution is required.  It can be given using
+    ``--resolution``, otherwise the user will be prompted to choose from
+    a list of resolutions.
+
+    Marking bugs as duplicates
+    --------------------------
+
+    To set a bug as a duplicate, simply use ``--dupe-of <BUG>``.  ``--status``
+    and ``--resolution`` will be ignored.  Bugzilla will automatically set the
+    status and resolution fields to appropriate values for duplicate bugs.
+    """
+
+    args = [
+        lambda x: x.add_argument('--dupe-of', type=int, metavar='BUG',
+            help='The bug of which the given bugs are duplicates.'),
+    ]
+
     def __call__(self):
         args = self._args
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
+
+        if args.dupe_of:
+            # This is all we need; --status and --resolution are ignored
+            return map(
+                lambda x: self.bz.bug(x).set_dupe_of(args.dupe_of, message),
+                args.bugs
+            )
 
         # get the values of the 'bug_status' field
         values = filter(

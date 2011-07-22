@@ -6,6 +6,9 @@ Bug fixes
 
 - ``status`` only prompts for resolution if new status is closed and current
   status is open (``--resolution`` may still be specified, however.)
+- ``status`` learned the ``--dupe-of`` argument; this is all that's needed
+  to mark a bug as a duplicate of another (Bugzilla with automatically set
+  the status and resolution fields to appropriate values).
 
 
 bugzillatools-0.2.1 :: Tue Jul 12 2011
