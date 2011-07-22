@@ -75,26 +75,6 @@ def with_optional_message(cls):
     return cls
 
 
-def with_status(cls):
-    cls.args = cls.args + [
-        lambda x: x.add_argument('--status',
-            help='Specify a resolution (case-insensitive).'),
-        lambda x: x.add_argument('--choose-status', action='store_true',
-            help='Choose status from a list.')
-    ]
-    return cls
-
-
-def with_resolution(cls):
-    cls.args = cls.args + [
-        lambda x: x.add_argument('--resolution',
-            help='Specify a resolution (case-insensitive).'),
-        lambda x: x.add_argument('--choose-resolution', action='store_true',
-            help='Choose resolution from a list.')
-    ]
-    return cls
-
-
 def with_limit(things='items', default=None):
     def decorator(cls):
         cls.args = cls.args + [
@@ -434,8 +414,6 @@ class Products(BugzillaCommand):
 
 
 @with_bugs
-@with_status
-@with_resolution
 @with_optional_message
 class Status(BugzillaCommand):
     """Set the status of the given bugs.
@@ -444,12 +422,14 @@ class Status(BugzillaCommand):
     -----------
 
     The ``status`` command is used to update the status and resolution of
-    bugs.  Status is given with the ``--status`` argument.
+    bugs.  The status is always required unless ``-dupe-of`` is used (see
+    below).  It can be given as the argument to ``--status``, otherwise the
+    user will be prompted to choose the status from a list.
 
     If the status is changing from one considered "open" to one not
     considered "open", a resolution is required.  It can be given using
-    ``--resolution``, otherwise the user will be prompted to choose from
-    a list of resolutions.
+    ``--resolution``, otherwise the user will be prompted to choose the
+    resolution from a list.
 
     Marking bugs as duplicates
     --------------------------
@@ -460,6 +440,10 @@ class Status(BugzillaCommand):
     """
 
     args = [
+        lambda x: x.add_argument('--status',
+            help='Specify a resolution (case-insensitive).'),
+        lambda x: x.add_argument('--resolution',
+            help='Specify a resolution (case-insensitive).'),
         lambda x: x.add_argument('--dupe-of', type=int, metavar='BUG',
             help='The bug of which the given bugs are duplicates.'),
     ]

@@ -9,6 +9,8 @@ Bug fixes
 - ``status`` learned the ``--dupe-of`` argument; this is all that's needed
   to mark a bug as a duplicate of another (Bugzilla with automatically set
   the status and resolution fields to appropriate values).
+- The unused ``--choose-status`` and ``--choose-resolution`` arguments were
+  removed from ``status``.
 
 
 bugzillatools-0.2.1 :: Tue Jul 12 2011
