@@ -36,9 +36,9 @@ class Bug(object):
         self.bugno = None
         self.data = None
         self.comments = None
-        if isinstance(bugno_or_data, int):
-            self.bugno = bugno_or_data
-        elif bugno_or_data:
+        try:
+            self.bugno = int(bugno_or_data)
+        except TypeError:
             self.data = bugno_or_data
 
     def rpc(self, *args, **kwargs):
