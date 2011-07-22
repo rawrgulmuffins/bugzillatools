@@ -52,7 +52,7 @@ def post_commit_hook(
         tracker = bzrlib.bugtracker.tracker_registry.get_tracker(tag, branch)
         UPIBT = bzrlib.bugtracker.URLParametrizedIntegerBugTracker
         if not isinstance(tracker, UPIBT) or tracker.type_name != 'bugzilla':
-            continue  # not a bugzilla
+            continue  # tracker is not a bugzilla tracker
 
         if status_by_url[tracker.get_bug_url(bug)] != bzrlib.bugtracker.FIXED:
             # bzrlib only groks fixed for now, but if other statuses come
@@ -64,9 +64,9 @@ def post_commit_hook(
         try:
             url, user, password = bzlib.config.get('servers').get(tag)
         except AttributeError:
-            pass  # todo no servers defined
+            pass  # no servers defined
         except TypeError:
-            pass  # todo no server for tag
+            pass  # no server for tag
 
         # url falls back to bzr config (tracker url)
         #
@@ -82,11 +82,22 @@ def post_commit_hook(
         # password falls back to bzr config
         password = password \
             or config.get_user_option('bugzilla_%s_password' % tag)
+        if not password:
+            bzrlib.trace.warning(
+                "Password not defined for bugtracker '{}'.".format(tag)
+            )
+            continue
 
         # get status and resolution
         status = config.get_user_option('bugzilla_%s_status' % tag)
         resolution = config.get_user_option('bugzilla_%s_resolution' % tag)
-        # TODO check this worked
+        if not (status and resolution):
+            bzrlib.trace.warning(
+                "Status or resolution not defined for bugtracker '{}'.".format(
+                    tag
+                )
+            )
+            continue
 
         bugs.append([bug, url, user, password, status, resolution])
 
@@ -109,12 +120,14 @@ def post_commit_hook(
     print 'message:\n', msg
 
     for bug, url, user, password, status, resolution in bugs:
-        print 'marking %s %s as %s' % (url, status, user)
+        print 'Setting status of bug {} on {} to {} {}'.format(
+            bug, url, status, resolution
+        )
         bz = bzlib.bugzilla.Bugzilla(url, user, password)
         try:
             bz.bug(bug).set_status(status, resolution, msg)
         except Exception as e:
-            bzrlib.trace.show_error(str(e))
+            bzrlib.trace.show_error('Bugtracker error: ' + str(e))
 
 
 def get_command_hook(cmd_or_None, command_name):
