@@ -43,6 +43,12 @@ def post_commit_hook(
 
     # since we made it to post-commit, all the bugtracker handles are valid
     for tag, bug in map(lambda x: x.split(':'), fixes or []):
+        enabled = config.get_user_option(
+            'bugzilla_%s_bugzillatools_enable' % tag
+        )
+        if not enabled:
+            continue  # bugzillatools not enabled for this tracker
+
         tracker = bzrlib.bugtracker.tracker_registry.get_tracker(tag, branch)
         UPIBT = bzrlib.bugtracker.URLParametrizedIntegerBugTracker
         if not isinstance(tracker, UPIBT) or tracker.type_name != 'bugzilla':
