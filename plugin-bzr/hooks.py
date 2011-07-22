@@ -17,86 +17,98 @@
 import functools
 import StringIO
 
+import bzlib.bugzilla
+import bzlib.config
+
 import bzrlib.builtins
 import bzrlib.branch
 import bzrlib.bugtracker
 import bzrlib.config
 import bzrlib.log
+import bzrlib.trace
 
 
 def post_commit_hook(
-    local,
-    master,
-    old_revno,
-    old_revid,
-    new_revno,
-    new_revid,
-    fixes=None
+    local, master, old_revno, old_revid, new_revno, new_revid,  # bzrlib args
+    fixes=None  # this one get curried using functools.partial
 ):
-    """This hook modifies bugzilla trackers according to --fixes."""
-    fixes = fixes or []
-
+    """This hook marks fixed bugzilla bugs specified by --fixes arguments."""
     branch = local or master
     config = branch.get_config()
     revision = branch.repository.get_revision(new_revid)
+    status_by_url = dict(revision.iter_bugs())
 
     # store bugzilla tasks
-    bugz = []
+    bugs = []
 
-    for fix in fixes:
-
-        # since we got to post_commit, we can assume the handles are valid
-        tag, bug = fix.split(':')
+    # since we made it to post-commit, all the bugtracker handles are valid
+    for tag, bug in map(lambda x: x.split(':'), fixes or []):
         tracker = bzrlib.bugtracker.tracker_registry.get_tracker(tag, branch)
         UPIBT = bzrlib.bugtracker.URLParametrizedIntegerBugTracker
         if not isinstance(tracker, UPIBT) or tracker.type_name != 'bugzilla':
             continue  # not a bugzilla
 
-        # get bugzilla credentials for this tracker
-        #   user defaults to email address of committer
-        user = config.get_user_option('bugzilla_%s_user' % tag) \
-                or bzrlib.config.extract_email_address(revision.committer)
-        #   no default for password; if not supplied, we skip
-        password = config.get_user_option('bugzilla_%s_password' % tag)
-        if not password:
+        if status_by_url[tracker.get_bug_url(bug)] != bzrlib.bugtracker.FIXED:
+            # bzrlib only groks fixed for now, but if other statuses come
+            # along this will filter them out
             continue
 
-        # find the matching revprop
-        # this code isn't really required right now, given that the only
-        # valid status is 'fixed', but if more are added, this will
-        # provide the appropriate filtering
-        for url, status in revision.iter_bugs():
-            if url != tracker.get_bug_url(bug):
-                continue  # not this bugtracker
-            if status != bzrlib.bugtracker.FIXED:
-                continue  # not a fixed bug
+        # see if bzlib knows about this server
+        url, user, password = None, None, None
+        try:
+            url, user, password = bzlib.config.get('servers').get(tag)
+        except AttributeError:
+            pass  # todo no servers defined
+        except TypeError:
+            pass  # todo no server for tag
 
-            # fix matches a bugzilla bug and status is 'fixed'
-            # append the task to bugz
-            bugz.append([bug, url, user, password, status])
+        # url falls back to bzr config (tracker url)
+        #
+        # ugly hack: API doesn't expose the tracker URL, but _base_url property
+        # is defined for URLParametrizedBugTracker, which bugzilla trackers are
+        url = url or tracker._base_url
 
-    if bugz:
-        outf = StringIO.StringIO()
-        # show master branch (i.e. bound location if a bound branch)
-        outf.write('Fixed in commit at:\n %s\n\n' % master.base)
-        lf = bzrlib.log.log_formatter('long', show_ids=True, to_file=outf)
-        bzrlib.log.show_log(
-            branch,
-            lf,
-            start_revision=new_revno,
-            end_revision=new_revno,
-            verbose=True
-        )
-        msg = outf.getvalue()
-        print 'message:\n', msg
+        # user falls back to bzr config, then committer
+        user = user \
+            or config.get_user_option('bugzilla_%s_user' % tag) \
+            or bzrlib.config.extract_email_address(revision.committer)
 
-        for bug, url, user, password, status in bugz:
-            print 'marking %s %s as %s' % (url, status, user)
-            # TODO move to bzlib
-            bz = bugzilla.Bugzilla(url, user, password)
-            if status == bzrlib.bugtracker.FIXED:
-                if not bz.fix(bug, msgw):
-                    print 'ERROR: unable to mark bug fixed'
+        # password falls back to bzr config
+        password = password \
+            or config.get_user_option('bugzilla_%s_password' % tag)
+
+        # get status and resolution
+        status = config.get_user_option('bugzilla_%s_status' % tag)
+        resolution = config.get_user_option('bugzilla_%s_resolution' % tag)
+        # TODO check this worked
+
+        bugs.append([bug, url, user, password, status, resolution])
+
+    if not bugs:
+        return  # nothing to do
+
+    # assemble the comment
+    outf = StringIO.StringIO()
+    # show master branch (i.e. bound location if a bound branch)
+    outf.write('Fixed in commit at:\n %s\n\n' % master.base)
+    lf = bzrlib.log.log_formatter('long', show_ids=True, to_file=outf)
+    bzrlib.log.show_log(
+        branch,
+        lf,
+        start_revision=new_revno,
+        end_revision=new_revno,
+        verbose=True
+    )
+    msg = outf.getvalue()
+    print 'message:\n', msg
+
+    for bug, url, user, password, status, resolution in bugs:
+        print 'marking %s %s as %s' % (url, status, user)
+        bz = bzlib.bugzilla.Bugzilla(url, user, password)
+        try:
+            bz.bug(bug).set_status(status, resolution, msg)
+        except Exception as e:
+            bzrlib.trace.show_error(str(e))
 
 
 def get_command_hook(cmd_or_None, command_name):
