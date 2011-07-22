@@ -1,10 +1,13 @@
-Bugzilla CLI client and XML-RPC interface library
-=================================================
+Bugzilla CLI client and XML-RPC binding and VCS plugins
+=======================================================
 
 Provides a CLI program and Python library for interacting with the
-Bugzilla_ bug tracking system.
+Bugzilla_ bug tracking system, and plugins for version control
+systems that enable interaction with Bugzilla installations.
 
-Requires Python 2.7 and works with Bugzilla 4.0 or later.
+Requires Python_ 2.7 and works with Bugzilla_ 4.0 or later.
+
+The Bazaar_ plugin requires Bazaar 2.0 or later.
 
 ``bugzilla``
 ------------
@@ -24,11 +27,22 @@ The following subcommands are available:
 :products: List the products of a Bugzilla instance.
 :status: Set the status of the given bugs.
 
-``bugzillalib``
+``bzlib``
 ---------------
 
 Library providing access to Bugzilla instances through its XML-RPC
 interface.  Supports bug creation, commenting, reassignment and status
 updates.
 
+Bazaar_ plugin
+-------------
+
+This plugin, when enabled for Bugzilla bugtrackers, marks bugs fixed on
+those trackers when ``bzr commit`` is invoked with the ``--fixes`` argument.
+It also adds a comment to the bug that includes the branch location, the
+commit message, the list of changed files and other details about the commit.
+
+
+.. _Bazaar: http://bazaar.canonical.com/
 .. _Bugzilla: http://www.bugzilla.org/
+.. _Python: http://python.org/
