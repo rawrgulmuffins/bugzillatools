@@ -20,7 +20,7 @@ Description
 -----------
 
 This plugin, when enabled for Bugzilla bugtrackers, marks bugs fixed on
-those trackers when ``bzr commit`` is invoked with the ``fixes`` argument.
+those trackers when ``bzr commit`` is invoked with the ``--fixes`` argument.
 It also adds a comment to the bug that includes the branch location, the
 commit message, the list of changed files and other details about the commit.
 
