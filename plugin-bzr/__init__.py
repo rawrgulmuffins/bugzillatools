@@ -21,6 +21,8 @@ Description
 
 This plugin, when enabled for Bugzilla bugtrackers, marks bugs fixed on
 those trackers when ``bzr commit`` is invoked with the ``fixes`` argument.
+It also adds a comment to the bug that includes the branch location, the
+commit message, the list of changed files and other details about the commit.
 
 Configuration
 -------------
@@ -29,7 +31,11 @@ Define the bugtracker in your ``bazaar.conf`` in the normal fashion, and
 enable *bugzillatools* for that tracker.
 
     bugzilla_<handle>_url = <url>
-    bugzilla_<handle>_bugzillatools = True
+    bugzilla_<handle>_bugzillatools_enable = True
+
+The type of ``bugzilla_<handle>_bugzillatools_enable`` is actually string,
+not boolean, so to explicitly disable the plugin leave the line blank after
+the ``=``.
 
 If the handle matches a server in your ``.bugzillarc``, no further
 configuration is needed; the parameters from this file will be used.  The
