@@ -79,6 +79,7 @@ class Bugzilla(object):
             values = filter(lambda x: x['name'], values)
         if sort:
             values = sorted(values, key=lambda x: int(x['sortkey']))
+        return values
 
     def match_users(self, fragment, use_cache=True):
         """Return a list of users matching the given string."""
