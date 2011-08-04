@@ -461,11 +461,7 @@ class Status(BugzillaCommand):
             )
 
         # get the values of the 'bug_status' field
-        values = filter(
-            lambda x: x['name'] == 'bug_status',
-            self.bz.get_fields()
-        )[0]['values']
-        values = sorted(values, None, lambda x: int(x['sortkey']))
+        values = self.bz.get_field_values('bug_status')
 
         if args.status:
             status = args.status.upper()
@@ -473,7 +469,7 @@ class Status(BugzillaCommand):
             # choose status
             status = self._ui.choose(
                 'Choose a status',
-                filter(None, map(lambda x: x['name'], values))
+                map(lambda x: x['name'], values)
             )
 
         # check if the new status is "open"
@@ -496,13 +492,11 @@ class Status(BugzillaCommand):
             elif any(map(lambda x: x.is_open(), bugs)):
                 # A resolution was not supplied, but one is required since
                 # at least one of the bugs is currently open.  Choose one.
-                values = filter(
-                    lambda x: x['name'] == 'resolution',
-                    self.bz.get_fields()
-                )[0]['values']
-                values = sorted(values, None, lambda x: int(x['sortkey']))
-                values = filter(None, map(lambda x: x['name'], values))
-                resolution = self._ui.choose('Choose a resolution', values)
+                values = self.bz.get_field_values('resolution')
+                resolution = self._ui.choose(
+                    'Choose a resolution',
+                    map(lambda x: x['name'], values)
+                )
 
         return map(
             lambda x: self.bz.bug(x).set_status(

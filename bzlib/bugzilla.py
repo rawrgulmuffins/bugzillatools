@@ -69,6 +69,17 @@ class Bugzilla(object):
         self._fields = self.rpc('Bug', 'fields')['fields']
         return self._fields
 
+    def get_field_values(self, name, sort=True, omit_empty=True):
+        """Return the legal values for a field; a list of dicts."""
+        values = filter(
+            lambda x: x['name'] == name,
+            self.get_fields()
+        )[0]['values']
+        if omit_empty:
+            values = filter(lambda x: x['name'], values)
+        if sort:
+            values = sorted(values, key=lambda x: int(x['sortkey']))
+
     def match_users(self, fragment, use_cache=True):
         """Return a list of users matching the given string."""
         if use_cache and fragment in self._user_cache:
