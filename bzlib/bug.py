@@ -78,11 +78,14 @@ class Bug(object):
           - status
           - priority
           - cc
+
+        Return the new bug ID.
         """
         if self.bugno or 'id' in self.data:
             raise Exception("bugno is known; not creating bug.")
         result = self.rpc('create', **self.data)
         self.bugno = result['id']
+        return self.bugno
 
     def get_comments(self):
         self.read_comments()
