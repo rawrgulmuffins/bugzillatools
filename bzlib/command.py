@@ -432,7 +432,54 @@ class New(BugzillaCommand):
                     'Enter the {}'.format(field['display_name'])
                 )
 
-        # TODO input optional fields
+        # fill out a comment ("Description") if not already defined
+        if 'comment' not in b.data:
+            b.data['comment'] = editor.input(
+                'Enter a description of the problem.'
+            )
+
+        # list of create fields ripped from Bugzilla documentation
+        # (this info is not introspectable as of Bugzilla 4.0)
+        create_fields = [
+            'product', 'component', 'summary', 'version', 'comment',
+            'op_sys', 'platform', 'priority', 'severity', 'alias',
+            'assigned_to', 'cc', 'comment_is_private', 'groups',
+            'qa_contact', 'status', 'target_milestone',
+        ]
+
+        # let user choose which of these other fields to define
+        optional_fields = [ \
+            x['display_name'] for x in fields \
+            if x['name'] in create_fields \
+                and x['name'] not in b.data.viewkeys()
+        ]
+
+        # prompt user for the fields they wish to define
+        user_fields = self._ui.chooseN(
+            'Set values for other fields?',
+            optional_fields,
+            default=[]
+        )
+
+        # iterate over those fields, prompting user for values
+        for field in [x for x in fields if x['display_name'] in user_fields]:
+            if field['name'] in b.data:
+                continue  # field is already defined
+            if 'values' in field:
+                values = self.bz.get_field_values(
+                    field['name'],
+                    visible_for=b.data
+                )
+                # TODO handle select-multiple fields
+                b.data[field['name']] = self._ui.choose(
+                    'Choose the {}'.format(field['display_name']),
+                    map(lambda x: x['name'], values)
+                )
+            else:
+                # TODO take field types into account
+                b.data[field['name']] = self._ui.text(
+                    'Enter the {}'.format(field['display_name'])
+                )
 
         # create the bug
         id = b.create()
