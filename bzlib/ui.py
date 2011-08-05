@@ -155,7 +155,12 @@ class UI(object):
 
         The default, if provided, is an index; the item of that index will
         be returned.
+
+        If the list has a single item, that item is returned without
+        prompting the user at all.
         """
+        if len(items) == 1:
+            return items[0]  # only one item; return it without prompting
         if default is not None and (default >= len(items) or default < 0):
             raise IndexError
         prompt = prompt if prompt is not None else "Choose from following:"
