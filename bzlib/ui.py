@@ -116,6 +116,8 @@ class UI(object):
             except InvalidInputError as e:
                 if e.message:
                     self.show('ERROR: ' + e.message)
+            except EOFError:
+                raise RejectWarning
             except KeyboardInterrupt:
                 raise RejectWarning
 
