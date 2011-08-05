@@ -16,6 +16,7 @@
 
 import functools
 import math
+import re
 import sys
 
 curry = functools.partial
@@ -55,16 +56,72 @@ def filter_int(string, default=None, start=None, stop=None):
     try:
         i = int(string)
         if start is not None and i < start:
-            raise InvalidInputError("value too small")
+            raise InvalidInputError(
+                'value too small; minimum is {}'.format(start))
         if stop is not None and i >= stop:
-            raise InvalidInputError("value too large")
+            raise InvalidInputError(
+                'value too large; maximum is {}'.format(stop - 1))
         return i
     except ValueError:
         if not string and default is not None:
             # empty string, default was given
             return default
         else:
-            raise InvalidInputError
+            raise InvalidInputError('not an integer: {}'.format(string))
+
+
+def filter_int_list(
+    string,
+    default=None,
+    start=None,
+    stop=None,
+    min_allowed=None,
+    max_allowed=None,
+    allow_duplicates=True,
+    filter_duplicates=True
+):
+    """Return a list of integers in the given range, or the default list.
+
+    string
+      A string of ints delimited by commas, colons, semicolons and whitespace.
+    default
+      A list of integers (possibly empty), or None.
+    start
+      The minimum value that can appear (inclusive), or None.
+    stop
+      The upper bound of the range (exclusive), or None.
+    min_allowed
+      The minimum number of responses allowed (inclusive), or None.
+    max_allowed
+      The maximum number of responses allowed (exclusive), or None.
+    allow_duplicates
+      Whether duplicates are allowed in the input.  Defaults to True.
+    filter_duplicates
+      Whether duplicates are filtered out of the list before returning.
+      Defaults to True.
+
+    The min_allowed and max_allowed constraints are applied after
+    duplicates are filtered out, if the duplicate filtering behaviour
+    is used.
+    """
+    if not string and default is not None:
+        return default
+    pattern = re.compile(r'[\s:;,]+')
+    strs = filter(None, pattern.split(string))
+    if not strs:
+        raise InvalidInputError('not a list of integers')
+    ints = map(curry(filter_int, start=start, stop=stop), strs)
+    intset = set(ints)
+    if len(intset) != len(ints):
+        if not allow_duplicates:
+            raise InvalidInputError('duplicates are not allowed')
+        if filter_duplicates:
+            ints = list(intset)
+    if min_allowed is not None and len(ints) < min_allowed:
+        raise InvalidInputError('too few values supplied')
+    if max_allowed is not None and len(ints) >= max_allowed:
+        raise InvalidInputError('too many values supplied')
+    return ints
 
 
 def filter_decimal(string, default=None, lower=None, upper=None):
@@ -172,3 +229,54 @@ class UI(object):
             curry(filter_int, default=default, start=0, stop=len(items)),
             prompt
         )]
+
+    def chooseN(self,
+        prompt,
+        items,
+        default=None,
+        min_allowed=None,
+        max_allowed=None
+    ):
+        """Prompt the user to choose multiple items from a list.
+
+        prompt:
+            Message with which to prompt user.  If None given, a default
+            prompt is generated.
+        items:
+            A list of items from which to choose.
+        default:
+            A list of indices.  If the default is used, the list of values
+            corresponding to these indices will be returned.  If any value
+            is out of range, IndexError is raised.
+        min_allowed:
+            The minimum number of items that must be chosen from the list
+            (inclusive).  Defaults to None (no minimum).
+        max_allowed:
+            The maximum number of items that must be chosen from the list
+            (exclusive).  Defaults to None (no maximum).
+        """
+        if default and filter(lambda x: x >= len(items) or x < 0, default):
+            raise IndexError('Default value ({}) out of range({})'.format(
+                default, len(default)
+            ))
+
+        prompt = prompt if prompt is not None else \
+            "Choose from the following (multiple values may be chosen):"
+        self.show(prompt + '\n')
+        self.show('\n'.join(number(items)))  # show the items
+        prompt = "Enter the numbers of chosen items " \
+            "(comma or space separated list)"
+        prompt += ' [{}]: '.format(' '.join(default)) if default is not None \
+            else ': '
+        indices = self.input(
+            curry(
+                filter_int_list,
+                default=default,
+                start=0,
+                stop=len(items),
+                min_allowed=min_allowed,
+                max_allowed=max_allowed
+            ),
+            prompt
+        )
+        return map(lambda x: items[x], indices)
