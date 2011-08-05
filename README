@@ -24,6 +24,7 @@ The following subcommands are available:
 :help: Show help.
 :info: Show detailed information about the given bugs.
 :list: Show a one-line summary of the given bugs.
+:new: File a new bug.
 :products: List the products of a Bugzilla instance.
 :status: Set the status of the given bugs.
 

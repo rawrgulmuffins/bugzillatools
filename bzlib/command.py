@@ -20,6 +20,7 @@ import argparse
 import itertools
 import textwrap
 
+from . import bug
 from . import bugzilla
 from . import config
 from . import editor
@@ -395,9 +396,47 @@ class List(BugzillaCommand):
             )
 
 
-#class New(BugzillaCommand):
-#    """File a new bug."""
-#    pass
+class New(BugzillaCommand):
+    """File a new bug."""
+    def __call__(self):
+        # create new Bug
+        b = bug.Bug(self.bz)
+
+        # get mandatory fields
+        fields = self.bz.get_fields()
+        mandatory_fields = filter(lambda x: x['is_mandatory'], fields)
+
+        # first choose the product
+        b.data['product'] = self._ui.choose(
+            'Choose a product',
+            map(lambda x: x['name'], self.bz.get_products())
+        )
+
+        # fill out other mandatory fields
+        for field in mandatory_fields:
+            if field['name'] in b.data:
+                continue  # field is already defined
+            if 'values' in field:
+                values = self.bz.get_field_values(
+                    field['name'],
+                    visible_for=b.data
+                )
+                # TODO handle select-multiple fields
+                b.data[field['name']] = self._ui.choose(
+                    'Choose the {}'.format(field['display_name']),
+                    map(lambda x: x['name'], values)
+                )
+            else:
+                # TODO take field types into account
+                b.data[field['name']] = self._ui.text(
+                    'Enter the {}'.format(field['display_name'])
+                )
+
+        # TODO input optional fields
+
+        # create the bug
+        id = b.create()
+        self._ui.show('Created Bug {}'.format(id))
 
 
 class Products(BugzillaCommand):
