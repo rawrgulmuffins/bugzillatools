@@ -25,6 +25,7 @@ class UserError(Exception):
 
 class Bugzilla(object):
 
+    _products = None
     _fields = None
     _user_cache = {}
 
@@ -61,6 +62,14 @@ class Bugzilla(object):
     def bug(self, bugno):
         """Extrude a Bug object."""
         return bug.Bug(self, bugno)
+
+    def get_products(self, use_cache=True):
+        """Get accessible products of this Bugzilla."""
+        if use_cache and self._products:
+            return self._products
+        ids = self.rpc('Product', 'get_accessible_products')['ids']
+        self._products = self.rpc('Product', 'get', ids=ids)['products']
+        return self._products
 
     def get_fields(self, use_cache=True):
         """Get information about bug fields."""
