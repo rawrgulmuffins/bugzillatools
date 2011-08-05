@@ -21,7 +21,7 @@ class Bug(object):
     def search(cls, bz, args):
         pass
 
-    def __init__(self, bz, bugno_or_data):
+    def __init__(self, bz, bugno_or_data=None):
         """Create a bug object.
 
         bz: a bzlib.Bugzilla object
@@ -39,7 +39,7 @@ class Bug(object):
         try:
             self.bugno = int(bugno_or_data)
         except TypeError:
-            self.data = bugno_or_data
+            self.data = bugno_or_data or {}
 
     def rpc(self, *args, **kwargs):
         """Does an RPC on the Bugzilla server.
