@@ -78,14 +78,32 @@ class Bugzilla(object):
         self._fields = self.rpc('Bug', 'fields')['fields']
         return self._fields
 
-    def get_field_values(self, name, sort=True, omit_empty=True):
-        """Return the legal values for a field; a list of dicts."""
-        values = filter(
-            lambda x: x['name'] == name,
-            self.get_fields()
-        )[0]['values']
+    def get_field_values(self,
+        name,
+        sort=True,
+        omit_empty=True,
+        visible_for=None
+    ):
+        """Return the legal values for a field; a list of dicts.
+
+        visible_for:
+            A dict of bug data.  If the field has a value_field and its value
+            is a key in the dict, the value of that bug field will be used to
+            filter the values of field being queried accord to the contents of
+            visibility_values.  If the field does not have a value_field, no
+            effect.  If not supplied, no effect.
+        """
+        field = filter(lambda x: x['name'] == name, self.get_fields())[0]
+        values = field['values']
         if omit_empty:
             values = filter(lambda x: x['name'], values)
+        value_field = field.get('value_field')
+        if visible_for and value_field and value_field in visible_for:
+            visibility_value = visible_for[value_field]
+            values = filter(
+                lambda x: visibility_value in x['visibility_values'],
+                values
+            )
         if sort:
             values = sorted(values, key=lambda x: int(x['sortkey']))
         return values
