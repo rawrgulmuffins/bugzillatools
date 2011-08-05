@@ -19,6 +19,17 @@ import xmlrpclib
 from . import bug
 
 
+# field type constants
+FIELD_UNKNOWN = 0
+FIELD_TEXT = 1
+FIELD_SELECT = 2
+FIELD_SELECT_MULTIPLE = 3
+FIELD_TEXTAREA = 4
+FIELD_DATETIME = 5
+FIELD_BUG_ID = 6
+FIELD_BUG_URL = 7
+
+
 class UserError(Exception):
     pass
 
