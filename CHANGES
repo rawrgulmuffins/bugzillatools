@@ -5,6 +5,7 @@ New features
 ------------
 
 - Added the Bazaar plugin.
+- ``new`` command: file a new bug, prompting user for bug data.
 - ``status`` learned the ``--dupe-of`` argument; this is all that's needed
   to mark a bug as a duplicate of another (Bugzilla with automatically set
   the status and resolution fields to appropriate values).
@@ -12,10 +13,17 @@ New features
 Bug fixes
 ---------
 
-- ``status`` only prompts for resolution if new status is closed and current
-  status is open (``--resolution`` may still be specified, however.)
-- The unused ``--choose-status`` and ``--choose-resolution`` arguments were
-  removed from ``status``.
+- ``status`` only prompts for resolution if new status is closed and
+  current status is open (``--resolution`` may still be specified,
+  however.)
+- The unused ``--choose-status`` and ``--choose-resolution`` arguments
+  were removed from ``status``.
+- Fix the index-field width when displaying choose-from lists (was too
+  wide when the number of items displayed was a power of 10)
+- Convert ``EOFError`` (``^D``) into ``bzlib.ui.RejectWarning`` when
+  prompting user for input.
+- Don't bother prompting the user to choose an item from a list that
+  contains only one item.
 
 
 bugzillatools-0.2.1 :: Tue Jul 12 2011
