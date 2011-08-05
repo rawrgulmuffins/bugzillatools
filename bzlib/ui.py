@@ -32,9 +32,7 @@ class RejectWarning(Warning):
 def number(items):
     """Maps numbering onto given values"""
     n = len(items)
-    if n == 0:
-        return items
-    width = math.log10(n - 1) // 1 + 1
+    width = math.log10(n - 1) // 1 + 1 if n > 1 else 1
     return map(
         lambda x: '[{0[0]:{1}}] {0[1]}'.format(x, int(width)),
         enumerate(items)
