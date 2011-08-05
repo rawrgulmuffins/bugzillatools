@@ -34,10 +34,9 @@ def number(items):
     n = len(items)
     if n == 0:
         return items
-    places = str(int(math.log10(n) // 1 + 1))
-    format = '[{0[0]:' + str(int(places)) + 'd}] {0[1]}'
+    width = math.log10(n - 1) // 1 + 1
     return map(
-        lambda x: format.format(x),
+        lambda x: '[{0[0]:{1}}] {0[1]}'.format(x, int(width)),
         enumerate(items)
     )
 
