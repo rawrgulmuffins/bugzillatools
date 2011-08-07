@@ -29,14 +29,14 @@ The following subcommands are available:
 :status: Set the status of the given bugs.
 
 ``bzlib``
----------------
+---------
 
-Library providing access to Bugzilla instances through its XML-RPC
-interface.  Supports bug creation, commenting, reassignment and status
-updates.
+Library providing access to Bugzilla instances through the XML-RPC
+interface.  Supports bug creation, bug information and comment
+retrieval, updating bug fields and appending comments to bugs.
 
 Bazaar_ plugin
--------------
+--------------
 
 This plugin, when enabled for Bugzilla bugtrackers, marks bugs fixed on
 those trackers when ``bzr commit`` is invoked with the ``--fixes`` argument.
