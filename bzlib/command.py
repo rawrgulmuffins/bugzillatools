@@ -87,6 +87,18 @@ def with_limit(things='items', default=None):
     return decorator
 
 
+def with_server(cls):
+    def add_server_args(parser):
+        group = parser.add_argument_group('server arguments')
+        group.add_argument('--server', default=config.get('default_server'),
+            help='Handle of Bugzilla instance to use')
+        group.add_argument('--url', help='Base URL of Bugzilla instance')
+        group.add_argument('--user', help='Bugzilla username')
+        group.add_argument('--password', help='Bugzilla password')
+    cls.args = cls.args + [add_server_args]
+    return cls
+
+
 class Command(object):
     """A command object.
 
@@ -123,7 +135,7 @@ class Command(object):
 
 class Help(Command):
     """Show help."""
-    args = [
+    args = Command.args + [
         lambda x: x.add_argument('subcommand', metavar='SUBCOMMAND', nargs='?',
             help='show help for subcommand')
     ]
@@ -143,6 +155,7 @@ class Help(Command):
                 self._parser.parse_args([self._args.subcommand, '--help'])
 
 
+@with_server
 class BugzillaCommand(Command):
     def __init__(self, *args, **kwargs):
         super(BugzillaCommand, self).__init__(*args, **kwargs)
@@ -170,8 +183,8 @@ class BugzillaCommand(Command):
 @with_optional_message
 class Assign(BugzillaCommand):
     """Assign bugs to the given user."""
-    args = [
-        lambda x: x.add_argument('--to', metavar='ASSIGNEE',
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--to', metavar='ASSIGNEE', required=True,
             help='New assignee'),
     ]
 
@@ -263,7 +276,7 @@ class CC(BugzillaCommand):
 @with_limit(things='comments')
 class Comment(BugzillaCommand):
     """List comments or file a comment on the given bugs."""
-    args = [
+    args = BugzillaCommand.args + [
         lambda x: x.add_argument('--reverse', action='store_true',
             default=True,
             help='Show from newest to oldest.'),
@@ -523,7 +536,7 @@ class Status(BugzillaCommand):
     status and resolution fields to appropriate values for duplicate bugs.
     """
 
-    args = [
+    args = BugzillaCommand.args + [
         lambda x: x.add_argument('--status',
             help='Specify a resolution (case-insensitive).'),
         lambda x: x.add_argument('--resolution',
