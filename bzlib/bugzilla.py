@@ -17,6 +17,7 @@
 import xmlrpclib
 
 from . import bug
+from . import config
 
 
 # field type constants
@@ -35,6 +36,40 @@ class UserError(Exception):
 
 
 class Bugzilla(object):
+
+    @classmethod
+    def from_config(cls,
+        server=None, url=None, user=None, password=None,
+        *args, **kwargs
+    ):
+        """Return a Bugzilla instance for the server or credentials given.
+
+        server
+          Handle of the server to use.
+        url
+          URL to use.  If server given, overrides its URL.
+        user
+          User to use.  If server given, overrides its user.
+        password
+          Password to use.  If server given, overrides its password.
+        """
+        if not (url and user and password):
+            if not server:
+                server = config.get('default_server')
+            if not server:
+                raise UserWarning("No server specified.")
+            try:
+                server = config.get('servers').get(server)
+            except AttributeError:
+                raise UserWarning("No servers defined.")
+            if not server:
+                raise UserWarning(
+                    "No configuration for server '{}'.".format(args.server)
+                )
+            url = url or server[0]
+            user = user or server[1]
+            password = password or server[2]
+        return cls(url, user, password)
 
     _products = None
     _fields = None

@@ -146,24 +146,9 @@ class Help(Command):
 class BugzillaCommand(Command):
     def __init__(self, *args, **kwargs):
         super(BugzillaCommand, self).__init__(*args, **kwargs)
-        # construct the Bugzilla object
-        args = self._args
-        url, user, password = args.url, args.user, args.password
-        if not (url and user and password):
-            if not args.server:
-                raise UserWarning("No server specified.")
-            try:
-                server = config.get('servers').get(args.server)
-            except AttributeError:
-                raise UserWarning("No servers defined.")
-            if not server:
-                raise UserWarning(
-                    "No configuration for server '{}'.".format(args.server)
-                )
-            url = url or server[0]
-            user = user or server[1]
-            password = password or server[2]
-        self.bz = bugzilla.Bugzilla(url, user, password)
+        # Get a Bugzilla object.
+        #  Bit of a hack, but there's no nice way to get dict from Namespace
+        self.bz = bugzilla.Bugzilla.from_config(**self._args.__dict__)
 
 
 @with_bugs
