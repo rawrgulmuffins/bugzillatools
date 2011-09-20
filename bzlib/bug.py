@@ -159,6 +159,31 @@ class Bug(object):
         if comment:
                 self.comments = None  # comments are stale
 
+    def update(self, **kwargs):
+        """Update the bug.
+
+        A wrapper for the RPC ``bug.update`` method that performs some sanity
+        checks and flushes cached data as necessary.
+        """
+        fields = frozenset([
+            'remaining_time', 'work_time',  # 'estimated_time', 'deadline',
+            'blocks', 'depends_on',
+            'cc',
+            'comment',
+        ])
+        unknowns = kwargs.viewkeys() - fields
+        if unknowns:
+            # unknown arguments
+            raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
+        # filter out ``None``s
+        kwargs = {k: v for k, v in kwargs.viewitems() if v is not None}
+        result = self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if 'comment' in kwargs:
+            self.comments = None  # comments are stale
+        return result
+        # TODO refactor other methods to use this
+
     def update_block(self, add=None, remove=None, set=None, comment=None):
         """Update the bugs that this bug blocks.
 
