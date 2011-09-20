@@ -64,6 +64,17 @@ def with_bugs(cls):
     return cls
 
 
+def with_time(cls):
+    cls.args = cls.args + [
+        lambda x: x.add_argument('--hours-worked', type=float,
+            help='Additional hours worked.'),
+        lambda x: x.add_argument('--hours-left', type=float,
+            help='Estimated time remaining.  If not supplied, any hours '
+                 'worked will be deducted from the current remaining time.'),
+    ]
+    return cls
+
+
 def with_optional_message(cls):
     def msgargs(parser):
         group = parser.add_mutually_exclusive_group()
@@ -580,6 +591,33 @@ class Status(BugzillaCommand):
 #class Search(BugzillaCommand):
 #    """Search for bugs with supplied attributes."""
 #    pass
+
+
+@with_bugs
+@with_optional_message
+@with_time
+class Time(BugzillaCommand):
+    """Show or adjust times and estimates for the the given bugs."""
+    def __call__(self):
+        args = self._args
+
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
+
+        if args.hours_worked or args.hours_left:
+            # adjust
+            if len(args.bugs) != 1:
+                # makes no sense to adjust hours on several bugs at once
+                raise UserWarning('Cannot adjust hours on multiple bugs.')
+            self.bz.bug(args.bugs[0]).update(
+                work_time=args.hours_worked,
+                remaining_time=args.hours_left,
+                comment=message
+            )
+        else:
+            # display
+            bugs = (self.bz.bug(bug) for bug in args.bugs)
+            raise NotImplementedError
 
 
 # the list got too long; metaprogram it ^_^
