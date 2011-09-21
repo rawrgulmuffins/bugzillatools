@@ -339,7 +339,8 @@ class Depend(BugzillaCommand):
 class Dump(BugzillaCommand):
     """Print internal representation of bug data."""
     def __call__(self):
-        print '\n'.join(str(self.bz.bug(x).data) for x in self._args.bugs)
+        bugs = (self.bz.bug(x) for x in self._args.bugs)
+        print '\n'.join(str((x.data, x.comments)) for x in bugs)
 
 
 class Fields(BugzillaCommand):
