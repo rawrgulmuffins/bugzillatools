@@ -335,6 +335,13 @@ class Depend(BugzillaCommand):
                     print '  No dependencies'
 
 
+@with_bugs
+class Dump(BugzillaCommand):
+    """Print internal representation of bug data."""
+    def __call__(self):
+        print '\n'.join(str(self.bz.bug(x).data) for x in self._args.bugs)
+
+
 class Fields(BugzillaCommand):
     """List valid values for bug fields."""
     def __call__(self):
