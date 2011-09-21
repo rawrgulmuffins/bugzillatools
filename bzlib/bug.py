@@ -17,6 +17,31 @@
 
 class Bug(object):
 
+    @property
+    def data(self):
+        if not self._data:
+            if not self.bugno:
+                raise Exception("bugno not provided.")
+            self._data = self.rpc('get', ids=[self.bugno])['bugs'][0]
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        self._data = value
+
+    @property
+    def comments(self):
+        if not self._comments:
+            if not self.bugno:
+                raise Exception("bugno not provided.")
+            result = self.rpc('comments', ids=[self.bugno])
+            self._comments = result['bugs'][str(self.bugno)]['comments']
+        return self._comments
+
+    @comments.setter
+    def comments(self, value):
+        self._comments = value
+
     @classmethod
     def search(cls, bz, args):
         pass
@@ -48,22 +73,6 @@ class Bug(object):
         """
         return self.bz.rpc(*(('Bug',) + args), **kwargs)
 
-    def read(self):
-        """Read bug data, unless already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        if not self.data:
-            self.data = self.rpc('get', ids=[self.bugno])['bugs'][0]
-
-    def read_comments(self):
-        """Read bug comments, unless already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        if not self.comments:
-            key = str(self.bugno)
-            self.comments = \
-                self.rpc('comments', ids=[self.bugno])['bugs'][key]['comments']
-
     def create(self):
         """Create a new bug.
 
@@ -87,17 +96,12 @@ class Bug(object):
         self.bugno = result['id']
         return self.bugno
 
-    def get_comments(self):
-        self.read_comments()
-        return self.comments
-
     def add_comment(self, comment):
         self.rpc('add_comment', id=self.bugno, comment=comment)
         self.comments = None  # comments are stale
 
     def is_open(self):
         """Return True if the bug is open, otherwise False."""
-        self.read()
         return self.data['is_open']
 
     def set_dupe_of(self, bug, comment=None):
@@ -149,9 +153,7 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         # TODO if comment is None, automatically construct comment?
         if update_status:
-            # check current status
-            if not self.data:
-                self.read()
+            # TODO nix this or move to config; not valid in all workflows
             if self.data['status'] == 'NEW':
                 kwargs['status'] = 'ASSIGNED'
         self.rpc('update', ids=[self.bugno], **kwargs)

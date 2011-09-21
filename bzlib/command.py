@@ -206,7 +206,6 @@ class Block(BugzillaCommand):
         else:
             # show blocked bugs
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['blocks']:
                     print '  Blocked bugs: {}'.format(
@@ -245,7 +244,6 @@ class CC(BugzillaCommand):
         else:
             # show CC List
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['cc']:
                     print '  CC List: {}'.format(
@@ -279,7 +277,7 @@ class Comment(BugzillaCommand):
         else:
             def cmtfmt(bug):
                 comments = sorted(
-                    enumerate(self.bz.bug(bug).get_comments()),
+                    enumerate(self.bz.bug(bug).comments),
                     key=lambda x: int(x[1]['id']),
                     reverse=True  # initially reverse to apply limit
                 )
@@ -329,7 +327,6 @@ class Depend(BugzillaCommand):
         else:
             # show dependencies
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['depends_on']:
                     print '  Dependencies: {}'.format(
@@ -368,7 +365,6 @@ class Info(BugzillaCommand):
         args = self._args
         fields = config.get_show_fields()
         for bug in map(self.bz.bug, args.bugs):
-            bug.read()
             print 'Bug {}:'.format(bug.bugno)
             fields = config.get_show_fields() & bug.data.viewkeys()
             width = max(map(len, fields)) - min(map(len, fields)) + 2
@@ -386,7 +382,6 @@ class List(BugzillaCommand):
         lens = map(lambda x: len(str(x)), args.bugs)
         width = max(lens) - min(lens) + 2
         for bug in map(self.bz.bug, args.bugs):
-            bug.read()
             print 'Bug {:{}} {}'.format(
                 str(bug.bugno) + ':', width, bug.data['summary']
             )
