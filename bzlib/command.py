@@ -66,11 +66,15 @@ def with_bugs(cls):
 
 def with_time(cls):
     cls.args = cls.args + [
-        lambda x: x.add_argument('--hours-worked', type=float,
+        lambda x: x.add_argument('--time-estimate', type=float,
+            help='The _total_ estimate of tiem required to fix the bug, '
+                 'in hours.'),
+        lambda x: x.add_argument('--time-worked', type=float,
             help='Additional hours worked.'),
-        lambda x: x.add_argument('--hours-left', type=float,
+        lambda x: x.add_argument('--time-left', type=float,
             help='Estimated time remaining.  If not supplied, any hours '
                  'worked will be deducted from the current remaining time.'),
+        # TODO: deadline
     ]
     return cls
 
@@ -600,27 +604,42 @@ class Status(BugzillaCommand):
 @with_optional_message
 @with_time
 class Time(BugzillaCommand):
-    """Show or adjust times and estimates for the the given bugs."""
+    """Show or adjust times and estimates for the given bugs."""
+    #TODO deadline
     def __call__(self):
         args = self._args
 
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
 
-        if args.hours_worked or args.hours_left:
+        if args.time_worked or args.time_left:
             # adjust
             if len(args.bugs) != 1:
                 # makes no sense to adjust hours on several bugs at once
                 raise UserWarning('Cannot adjust hours on multiple bugs.')
             self.bz.bug(args.bugs[0]).update(
-                work_time=args.hours_worked,
-                remaining_time=args.hours_left,
+                work_time=args.time_worked,
+                remaining_time=args.time_left,
                 comment=message
             )
         else:
             # display
+            #
+            # as of Bugzilla 4.0.1, "total hours worked" cannot be known.
+            # Hours are accumulated in the 'work_time' attribute of comments,
+            # which is not present in bug.comments RPC output.
             bugs = (self.bz.bug(bug) for bug in args.bugs)
-            raise NotImplementedError
+            for bug in bugs:
+                # if user is not in the "time-tracking" group, the fields will
+                # be absent from bug data.  first check that they're there.
+                time_fields = ('deadline', 'estimated_time', 'remaining_time')
+                if not all(x in bug.data for x in time_fields):
+                    print 'User is not in the time-tracking group.'
+                    return
+                print 'Bug {}:'.format(bug.bugno)
+                print '  Estimated time: {}'.format(bug.data['estimated_time'])
+                print '  Remaining time: {}'.format(bug.data['remaining_time'])
+                print '  Deadline:       {}'.format(bug.data['deadline'])
 
 
 # the list got too long; metaprogram it ^_^
