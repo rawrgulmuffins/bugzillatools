@@ -19,7 +19,7 @@ class Bug(object):
 
     @property
     def data(self):
-        if not self._data:
+        if self._data is None:
             if not self.bugno:
                 raise Exception("bugno not provided.")
             self._data = self.rpc('get', ids=[self.bugno])['bugs'][0]
@@ -31,7 +31,7 @@ class Bug(object):
 
     @property
     def comments(self):
-        if not self._comments:
+        if self._comments is None:
             if not self.bugno:
                 raise Exception("bugno not provided.")
             result = self.rpc('comments', ids=[self.bugno])
