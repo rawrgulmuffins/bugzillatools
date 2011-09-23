@@ -17,7 +17,9 @@
 from __future__ import unicode_literals
 
 import argparse
+import datetime
 import itertools
+import re
 import textwrap
 
 from . import bug
@@ -29,6 +31,16 @@ from . import editor
 class _ReadFileAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
         setattr(namespace, self.dest, values.read())
+
+
+def date(s):
+    match = re.match(r'(\d{4})-(\d\d)-(\d\d)$', s)
+    if not match:
+        raise argparse.ArgumentTypeError('Date must be in format: YYYY-MM-DD')
+    try:
+        return datetime.date(*map(int, match.group(1, 2, 3)))
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(e.message)
 
 
 def with_add_remove(src, dst, metavar=None, type=None):
@@ -66,15 +78,16 @@ def with_bugs(cls):
 
 def with_time(cls):
     cls.args = cls.args + [
-        lambda x: x.add_argument('--time-estimate', type=float,
-            help='The _total_ estimate of tiem required to fix the bug, '
+        lambda x: x.add_argument('--estimated-time', type=float,
+            help='Estimate of the total time required to fix the bug, '
                  'in hours.'),
-        lambda x: x.add_argument('--time-worked', type=float,
+        lambda x: x.add_argument('--work-time', type=float,
             help='Additional hours worked.'),
-        lambda x: x.add_argument('--time-left', type=float,
+        lambda x: x.add_argument('--remaining-time', type=float,
             help='Estimated time remaining.  If not supplied, any hours '
                  'worked will be deducted from the current remaining time.'),
-        # TODO: deadline
+        lambda x: x.add_argument('--deadline', type=date,
+            help='Date when the bug must be fixed, in format YYYY-MM-DD'),
     ]
     return cls
 
@@ -605,21 +618,24 @@ class Status(BugzillaCommand):
 @with_time
 class Time(BugzillaCommand):
     """Show or adjust times and estimates for the given bugs."""
-    #TODO deadline
     def __call__(self):
         args = self._args
 
         message = editor.input('Enter your comment.') if args.message is True \
             else args.message
 
-        if args.time_worked or args.time_left:
+        time_args = \
+            ['estimated_time', 'remaining_time', 'work_time', 'deadline']
+        if any(getattr(args, arg) is not None for arg in time_args):
             # adjust
             if len(args.bugs) != 1:
-                # makes no sense to adjust hours on several bugs at once
-                raise UserWarning('Cannot adjust hours on multiple bugs.')
+                # makes no sense to adjust times on several bugs at once
+                raise UserWarning('Cannot adjust times on multiple bugs.')
             self.bz.bug(args.bugs[0]).update(
-                work_time=args.time_worked,
-                remaining_time=args.time_left,
+                estimated_time=args.estimated_time,
+                remaining_time=args.remaining_time,
+                work_time=args.work_time,
+                deadline=args.deadline,
                 comment=message
             )
         else:
