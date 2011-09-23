@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 
 class Bug(object):
 
@@ -168,7 +170,7 @@ class Bug(object):
         checks and flushes cached data as necessary.
         """
         fields = frozenset([
-            'remaining_time', 'work_time',  # 'estimated_time', 'deadline',
+            'remaining_time', 'work_time', 'estimated_time', 'deadline',
             'blocks', 'depends_on',
             'cc',
             'comment',
@@ -177,8 +179,17 @@ class Bug(object):
         if unknowns:
             # unknown arguments
             raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
+
         # filter out ``None``s
         kwargs = {k: v for k, v in kwargs.viewitems() if v is not None}
+
+        # format deadline (YYYY-MM-DD)
+        if 'deadline' in kwargs:
+            date = kwargs['deadline']
+            if isinstance(date, datetime.datetime):
+                date = date.date()  # get date component of a datetime
+            kwargs['deadline'] = str(date)  # datetime.date formats in ISO
+
         result = self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if 'comment' in kwargs:
