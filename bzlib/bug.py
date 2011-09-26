@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -147,7 +147,6 @@ class Bug(object):
         kwargs = {'assigned_to': user}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         if update_status:
             # check current status
             if not self.data:
@@ -175,7 +174,6 @@ class Bug(object):
         kwargs = {'blocks': blocks}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
@@ -197,7 +195,6 @@ class Bug(object):
         kwargs = {'depends_on': depends}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
