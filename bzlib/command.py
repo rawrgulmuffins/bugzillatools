@@ -656,6 +656,7 @@ class Time(BugzillaCommand):
                 print '  Estimated time: {}'.format(bug.data['estimated_time'])
                 print '  Remaining time: {}'.format(bug.data['remaining_time'])
                 print '  Deadline:       {}'.format(bug.data['deadline'])
+                print '  Time worked:    {}'.format('<not available>')
 
 
 # the list got too long; metaprogram it ^_^
