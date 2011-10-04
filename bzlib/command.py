@@ -277,10 +277,16 @@ class Comment(BugzillaCommand):
     args = [
         lambda x: x.add_argument('--reverse', action='store_true',
             default=True,
-            help='Show from newest to oldest.'),
+            help='Show from newest to oldest (the default).'),
         lambda x: x.add_argument('--forward', action='store_false',
             dest='reverse',
             help='Show from oldest to newest.'),
+        lambda x: x.add_argument('--omit-empty', action='store_true',
+            default=True,
+            help='Omit empty comments (the default).'),
+        lambda x: x.add_argument('--include-empty', action='store_false',
+            dest='omit_empty',
+            help='Include empty comments.'),
     ]
 
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
@@ -308,13 +314,13 @@ class Comment(BugzillaCommand):
 
                 return '=====\nBUG {}\n\n-----\n{}'.format(
                     bug,
-                    '-----\n'.join(map(
-                        lambda (n, x): self.formatstring.format(
+                    '-----\n'.join(
+                        self.formatstring.format(
                             'comment: {}'.format(n) if n else 'description',
-                            **x
-                        ),
-                        comments
-                    ))
+                            **comment)
+                        for n, comment in comments
+                        if not args.omit_empty or comment['text']
+                    )
                 )
             print '\n'.join(map(cmtfmt, args.bugs))
 
