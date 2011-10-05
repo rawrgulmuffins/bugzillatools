@@ -11,6 +11,11 @@ New features
   worked, but no specific comment) from the output.  The default is to
   omit empty comments.
 
+Bug fixes
+---------
+
+- Bugzilla URLs are now more rigourously sanity checked.
+
 
 bugzillatools-0.3 :: Sun Aug 7 2011
 ===================================
