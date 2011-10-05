@@ -1,3 +1,17 @@
+bugzillatools-dev :: ???
+=========================
+
+New features
+------------
+
+- ``time`` command: show or adjust times and estimates for given bug.
+- ``dump`` command: print internal representation of bug(s).
+- ``comment`` learned the ``--omit-empty`` and ``--include-empty``
+  arguments; exclude or include empty comments (e.g. additional time
+  worked, but no specific comment) from the output.  The default is to
+  omit empty comments.
+
+
 bugzillatools-0.3 :: Sun Aug 7 2011
 ===================================
 
