@@ -5,6 +5,7 @@ New features
 ------------
 
 - ``time`` command: show or adjust times and estimates for given bug.
+- ``desc`` command: show the description of the given bugs.
 - ``dump`` command: print internal representation of bug(s).
 - ``comment`` learned the ``--omit-empty`` and ``--include-empty``
   arguments; exclude or include empty comments (e.g. additional time

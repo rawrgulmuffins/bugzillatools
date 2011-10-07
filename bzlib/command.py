@@ -359,6 +359,20 @@ class Depend(BugzillaCommand):
 
 
 @with_bugs
+class Desc(BugzillaCommand):
+    """Show the description of the given bug(s)."""
+    formatstring = 'author: {creator}\ntime: {time}\n\n{text}\n'
+    def __call__(self):
+        def _descfmt(bug):
+            desc = self.bz.bug(bug).comments[0]
+            return '=====\nBUG {}\n{}'.format(
+                bug,
+                self.formatstring.format(**desc)
+            )
+        print '\n'.join(_descfmt(bug) for bug in self._args.bugs)
+
+
+@with_bugs
 class Dump(BugzillaCommand):
     """Print internal representation of bug data."""
     def __call__(self):
