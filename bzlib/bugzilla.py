@@ -40,7 +40,7 @@ class Bugzilla(object):
     _fields = None
     _user_cache = {}
 
-    def __init__(self, url, user, password):
+    def __init__(self, url=None, user=None, password=None):
         """Create a Bugzilla XML-RPC client.
 
         url      : points to a bugzilla instance (base URL; must end in '/')

@@ -25,6 +25,8 @@ from . import bugzilla
 from . import config
 from . import editor
 
+conf = config.Config.get_config('~/.bugzillarc')
+
 
 class _ReadFileAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
@@ -89,8 +91,11 @@ def with_limit(things='items', default=None):
 
 def with_server(cls):
     def add_server_args(parser):
+        default = None
+        if conf.has_option('core', 'server'):
+            default = conf.get('core', 'server')
         group = parser.add_argument_group('server arguments')
-        group.add_argument('--server', default=config.get('default_server'),
+        group.add_argument('--server', default=default,
             help='Handle of Bugzilla instance to use')
         group.add_argument('--url', help='Base URL of Bugzilla instance')
         group.add_argument('--user', help='Bugzilla username')
@@ -161,22 +166,20 @@ class BugzillaCommand(Command):
         super(BugzillaCommand, self).__init__(*args, **kwargs)
         # construct the Bugzilla object
         args = self._args
-        url, user, password = args.url, args.user, args.password
-        if not (url and user and password):
-            if not args.server:
-                raise UserWarning("No server specified.")
+        server = {}
+        if args.server:
             try:
-                server = config.get('servers').get(args.server)
-            except AttributeError:
-                raise UserWarning("No servers defined.")
-            if not server:
+                server = dict(conf.items('server.' + args.server))
+            except config.NoSectionError:
                 raise UserWarning(
                     "No configuration for server '{}'.".format(args.server)
                 )
-            url = url or server[0]
-            user = user or server[1]
-            password = password or server[2]
-        self.bz = bugzilla.Bugzilla(url, user, password)
+        server.update({
+            k: getattr(args, k)
+            for k in ('url', 'user', 'password')
+            if getattr(args, k)
+        })
+        self.bz = bugzilla.Bugzilla(**server)
 
 
 @with_bugs
@@ -383,11 +386,11 @@ class Info(BugzillaCommand):
     """Show detailed information about the given bugs."""
     def __call__(self):
         args = self._args
-        fields = config.get_show_fields()
+        fields = config.show_fields
         for bug in map(self.bz.bug, args.bugs):
             bug.read()
             print 'Bug {}:'.format(bug.bugno)
-            fields = config.get_show_fields() & bug.data.viewkeys()
+            fields = config.show_fields & bug.data.viewkeys()
             width = max(map(len, fields)) - min(map(len, fields)) + 2
             for field in fields:
                 print '  {:{}} {}'.format(field + ':', width, bug.data[field])
@@ -399,7 +402,6 @@ class List(BugzillaCommand):
     """Show a one-line summary of the given bugs."""
     def __call__(self):
         args = self._args
-        fields = config.get_show_fields()
         lens = map(lambda x: len(str(x)), args.bugs)
         width = max(lens) - min(lens) + 2
         for bug in map(self.bz.bug, args.bugs):

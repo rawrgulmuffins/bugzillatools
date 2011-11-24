@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
+import ConfigParser
 import os.path
 
 
@@ -24,27 +24,26 @@ show_fields = [
     'summary',
 ]
 
-default = {}
+
+class Config(ConfigParser.SafeConfigParser):
+    _instances = {}
+
+    def __init__(self, path):
+        path = os.path.expanduser(path)
+        ConfigParser.SafeConfigParser.__init__(self)
+        self._path = path
+        self.read(self._path)
+
+    def write(self):
+        with open(self._path, 'w') as fp:
+            ConfigParser.SafeConfigParser.write(fp)
+
+    @classmethod
+    def get_config(cls, path):
+        path = os.path.expanduser(path)
+        if path not in cls._instances:
+            cls._instances[path] = cls(path)
+        return cls._instances[path]
 
 
-def read_config():
-    f = os.path.expanduser('~/.bugzillarc')
-    if not os.path.isfile(f):
-        # file doesn't exist; empty config
-        return None
-    with open(f) as fh:
-        return json.load(fh)
-
-config = read_config()
-
-
-def get(key):
-    if not config:
-        return None
-    return config.get(key) or default.get(key)
-
-
-def get_show_fields():
-    return set(show_fields) \
-        - set(get('ignore_fields') or []) \
-        | set(get('show_fields') or [])
+NoSectionError = ConfigParser.NoSectionError
