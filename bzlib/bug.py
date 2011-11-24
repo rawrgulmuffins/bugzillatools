@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 
 class Bug(object):
+
+    @property
+    def data(self):
+        if self._data is None:
+            if not self.bugno:
+                raise Exception("bugno not provided.")
+            self._data = self.rpc('get', ids=[self.bugno])['bugs'][0]
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        self._data = value
+
+    @property
+    def comments(self):
+        if self._comments is None:
+            if not self.bugno:
+                raise Exception("bugno not provided.")
+            result = self.rpc('comments', ids=[self.bugno])
+            self._comments = result['bugs'][str(self.bugno)]['comments']
+        return self._comments
+
+    @comments.setter
+    def comments(self, value):
+        self._comments = value
 
     @classmethod
     def search(cls, bz, args):
@@ -48,22 +75,6 @@ class Bug(object):
         """
         return self.bz.rpc(*(('Bug',) + args), **kwargs)
 
-    def read(self):
-        """Read bug data, unless already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        if not self.data:
-            self.data = self.rpc('get', ids=[self.bugno])['bugs'][0]
-
-    def read_comments(self):
-        """Read bug comments, unless already read."""
-        if not self.bugno:
-            raise Exception("bugno not provided.")
-        if not self.comments:
-            key = str(self.bugno)
-            self.comments = \
-                self.rpc('comments', ids=[self.bugno])['bugs'][key]['comments']
-
     def create(self):
         """Create a new bug.
 
@@ -87,17 +98,12 @@ class Bug(object):
         self.bugno = result['id']
         return self.bugno
 
-    def get_comments(self):
-        self.read_comments()
-        return self.comments
-
     def add_comment(self, comment):
         self.rpc('add_comment', id=self.bugno, comment=comment)
         self.comments = None  # comments are stale
 
     def is_open(self):
         """Return True if the bug is open, otherwise False."""
-        self.read()
         return self.data['is_open']
 
     def set_dupe_of(self, bug, comment=None):
@@ -147,17 +153,48 @@ class Bug(object):
         kwargs = {'assigned_to': user}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         if update_status:
-            # check current status
-            if not self.data:
-                self.read()
+            # TODO nix this or move to config; not valid in all workflows
             if self.data['status'] == 'NEW':
                 kwargs['status'] = 'ASSIGNED'
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
                 self.comments = None  # comments are stale
+
+    def update(self, **kwargs):
+        """Update the bug.
+
+        A wrapper for the RPC ``bug.update`` method that performs some sanity
+        checks and flushes cached data as necessary.
+        """
+        fields = frozenset([
+            'remaining_time', 'work_time', 'estimated_time', 'deadline',
+            'blocks', 'depends_on',
+            'cc',
+            'comment',
+        ])
+        unknowns = kwargs.viewkeys() - fields
+        if unknowns:
+            # unknown arguments
+            raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
+
+        # filter out ``None``s
+        kwargs = {k: v for k, v in kwargs.viewitems() if v is not None}
+
+        # format deadline (YYYY-MM-DD)
+        if 'deadline' in kwargs:
+            date = kwargs['deadline']
+            if isinstance(date, datetime.datetime):
+                date = date.date()  # get date component of a datetime
+            kwargs['deadline'] = str(date)  # datetime.date formats in ISO
+
+        result = self.rpc('update', ids=[self.bugno], **kwargs)
+        self.data = None  # data is stale
+        if 'comment' in kwargs:
+            self.comments = None  # comments are stale
+        return result
+        # TODO refactor other methods to use this
 
     def update_block(self, add=None, remove=None, set=None, comment=None):
         """Update the bugs that this bug blocks.
@@ -175,7 +212,6 @@ class Bug(object):
         kwargs = {'blocks': blocks}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:
@@ -197,7 +233,6 @@ class Bug(object):
         kwargs = {'depends_on': depends}
         if comment:
             kwargs['comment'] = {'body': comment}
-        # TODO if comment is None, automatically construct comment?
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:

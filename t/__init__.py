@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,12 +13,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-version_info = (0, 3, 1, 'dev', 0)
-
-version_fmt = '{0}.{1}'
-if version_info[2]:
-    version_fmt += '.{2}'
-if version_info[3] != 'final':
-    version_fmt += '{3}{4}'
-version = version_fmt.format(*version_info)

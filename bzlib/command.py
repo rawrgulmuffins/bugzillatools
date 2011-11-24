@@ -17,7 +17,9 @@
 from __future__ import unicode_literals
 
 import argparse
+import datetime
 import itertools
+import re
 import textwrap
 
 from . import bug
@@ -31,6 +33,16 @@ conf = config.Config.get_config('~/.bugzillarc')
 class _ReadFileAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
         setattr(namespace, self.dest, values.read())
+
+
+def date(s):
+    match = re.match(r'(\d{4})-(\d\d)-(\d\d)$', s)
+    if not match:
+        raise argparse.ArgumentTypeError('Date must be in format: YYYY-MM-DD')
+    try:
+        return datetime.date(*map(int, match.group(1, 2, 3)))
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(e.message)
 
 
 def with_add_remove(src, dst, metavar=None, type=None):
@@ -62,6 +74,22 @@ def with_bugs(cls):
     cls.args = cls.args + [
         lambda x: x.add_argument('bugs', metavar='BUG', type=int, nargs='+',
             help='Bug number'),
+    ]
+    return cls
+
+
+def with_time(cls):
+    cls.args = cls.args + [
+        lambda x: x.add_argument('--estimated-time', type=float,
+            help='Estimate of the total time required to fix the bug, '
+                 'in hours.'),
+        lambda x: x.add_argument('--work-time', type=float,
+            help='Additional hours worked.'),
+        lambda x: x.add_argument('--remaining-time', type=float,
+            help='Estimated time remaining.  If not supplied, any hours '
+                 'worked will be deducted from the current remaining time.'),
+        lambda x: x.add_argument('--deadline', type=date,
+            help='Date when the bug must be fixed, in format YYYY-MM-DD'),
     ]
     return cls
 
@@ -226,7 +254,6 @@ class Block(BugzillaCommand):
         else:
             # show blocked bugs
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['blocks']:
                     print '  Blocked bugs: {}'.format(
@@ -265,7 +292,6 @@ class CC(BugzillaCommand):
         else:
             # show CC List
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['cc']:
                     print '  CC List: {}'.format(
@@ -282,10 +308,16 @@ class Comment(BugzillaCommand):
     args = BugzillaCommand.args + [
         lambda x: x.add_argument('--reverse', action='store_true',
             default=True,
-            help='Show from newest to oldest.'),
+            help='Show from newest to oldest (the default).'),
         lambda x: x.add_argument('--forward', action='store_false',
             dest='reverse',
             help='Show from oldest to newest.'),
+        lambda x: x.add_argument('--omit-empty', action='store_true',
+            default=True,
+            help='Omit empty comments (the default).'),
+        lambda x: x.add_argument('--include-empty', action='store_false',
+            dest='omit_empty',
+            help='Include empty comments.'),
     ]
 
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
@@ -299,7 +331,7 @@ class Comment(BugzillaCommand):
         else:
             def cmtfmt(bug):
                 comments = sorted(
-                    enumerate(self.bz.bug(bug).get_comments()),
+                    enumerate(self.bz.bug(bug).comments),
                     key=lambda x: int(x[1]['id']),
                     reverse=True  # initially reverse to apply limit
                 )
@@ -313,13 +345,13 @@ class Comment(BugzillaCommand):
 
                 return '=====\nBUG {}\n\n-----\n{}'.format(
                     bug,
-                    '-----\n'.join(map(
-                        lambda (n, x): self.formatstring.format(
+                    '-----\n'.join(
+                        self.formatstring.format(
                             'comment: {}'.format(n) if n else 'description',
-                            **x
-                        ),
-                        comments
-                    ))
+                            **comment)
+                        for n, comment in comments
+                        if not args.omit_empty or comment['text']
+                    )
                 )
             print '\n'.join(map(cmtfmt, args.bugs))
 
@@ -349,13 +381,34 @@ class Depend(BugzillaCommand):
         else:
             # show dependencies
             for bug in bugs:
-                bug.read()
                 print 'Bug {}:'.format(bug.bugno)
                 if bug.data['depends_on']:
                     print '  Dependencies: {}'.format(
                         ', '.join(map(str, bug.data['depends_on'])))
                 else:
                     print '  No dependencies'
+
+
+@with_bugs
+class Desc(BugzillaCommand):
+    """Show the description of the given bug(s)."""
+    formatstring = 'author: {creator}\ntime: {time}\n\n{text}\n'
+    def __call__(self):
+        def _descfmt(bug):
+            desc = self.bz.bug(bug).comments[0]
+            return '=====\nBUG {}\n{}'.format(
+                bug,
+                self.formatstring.format(**desc)
+            )
+        print '\n'.join(_descfmt(bug) for bug in self._args.bugs)
+
+
+@with_bugs
+class Dump(BugzillaCommand):
+    """Print internal representation of bug data."""
+    def __call__(self):
+        bugs = (self.bz.bug(x) for x in self._args.bugs)
+        print '\n'.join(str((x.data, x.comments)) for x in bugs)
 
 
 class Fields(BugzillaCommand):
@@ -388,7 +441,6 @@ class Info(BugzillaCommand):
         args = self._args
         fields = config.show_fields
         for bug in map(self.bz.bug, args.bugs):
-            bug.read()
             print 'Bug {}:'.format(bug.bugno)
             fields = config.show_fields & bug.data.viewkeys()
             width = max(map(len, fields)) - min(map(len, fields)) + 2
@@ -405,7 +457,6 @@ class List(BugzillaCommand):
         lens = map(lambda x: len(str(x)), args.bugs)
         width = max(lens) - min(lens) + 2
         for bug in map(self.bz.bug, args.bugs):
-            bug.read()
             print 'Bug {:{}} {}'.format(
                 str(bug.bugno) + ':', width, bug.data['summary']
             )
@@ -610,6 +661,52 @@ class Status(BugzillaCommand):
 #class Search(BugzillaCommand):
 #    """Search for bugs with supplied attributes."""
 #    pass
+
+
+@with_bugs
+@with_optional_message
+@with_time
+class Time(BugzillaCommand):
+    """Show or adjust times and estimates for the given bugs."""
+    def __call__(self):
+        args = self._args
+
+        message = editor.input('Enter your comment.') if args.message is True \
+            else args.message
+
+        time_args = \
+            ['estimated_time', 'remaining_time', 'work_time', 'deadline']
+        if any(getattr(args, arg) is not None for arg in time_args):
+            # adjust
+            if len(args.bugs) != 1:
+                # makes no sense to adjust times on several bugs at once
+                raise UserWarning('Cannot adjust times on multiple bugs.')
+            self.bz.bug(args.bugs[0]).update(
+                estimated_time=args.estimated_time,
+                remaining_time=args.remaining_time,
+                work_time=args.work_time,
+                deadline=args.deadline,
+                comment=message
+            )
+        else:
+            # display
+            #
+            # as of Bugzilla 4.0.1, "total hours worked" cannot be known.
+            # Hours are accumulated in the 'work_time' attribute of comments,
+            # which is not present in bug.comments RPC output.
+            bugs = (self.bz.bug(bug) for bug in args.bugs)
+            for bug in bugs:
+                # if user is not in the "time-tracking" group, the fields will
+                # be absent from bug data.  first check that they're there.
+                time_fields = ('deadline', 'estimated_time', 'remaining_time')
+                if not all(x in bug.data for x in time_fields):
+                    print 'User is not in the time-tracking group.'
+                    return
+                print 'Bug {}:'.format(bug.bugno)
+                print '  Estimated time: {}'.format(bug.data['estimated_time'])
+                print '  Remaining time: {}'.format(bug.data['remaining_time'])
+                print '  Deadline:       {}'.format(bug.data['deadline'])
+                print '  Time worked:    {}'.format('<not available>')
 
 
 # the list got too long; metaprogram it ^_^

@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd
+# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import urlparse
 import xmlrpclib
 
 from . import bug
+from . import config
 
 
 # field type constants
@@ -31,6 +33,10 @@ FIELD_BUG_URL = 7
 
 
 class UserError(Exception):
+    pass
+
+
+class URLError(Exception):
     pass
 
 
@@ -51,10 +57,20 @@ class Bugzilla(object):
         self.user = user
         self.password = password
 
-        # TODO URL sanity checks
-        url = url[:-1] if url[-1] == '/' else url  # strip trailing slash
+        parsed_url = urlparse.urlparse(url)
+        if not parsed_url.netloc:
+            raise URLError('URL {!r} is not valid.'.format(url))
+        if parsed_url.scheme not in ('http', 'https'):
+            raise URLError(
+                'URL scheme {!r} not supported.'.format(parsed_url.scheme)
+            )
+        if parsed_url.params or parsed_url.query or parsed_url.fragment:
+            raise URLError(
+                'URL params, queries and fragments not supported.'
+            )
+        url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
         # httplib explodes if url is unicode
-        self.server = xmlrpclib.ServerProxy(str(url + '/xmlrpc.cgi'))
+        self.server = xmlrpclib.ServerProxy(str(url))
 
     def rpc(self, *args, **kwargs):
         """Do an RPC on the Bugzilla server.

@@ -15,18 +15,22 @@ The Bazaar_ plugin requires Bazaar 2.0 or later.
 Command-line application for interacting with Bugzilla servers.
 The following subcommands are available:
 
-:assign: Assign bugs to the given user.
-:block: Show or update block list of given bugs.
-:cc: Show or update CC List.
-:comment: List comments or file a comment on the given bugs.
-:depend: Show or update dependencies of given bugs.
-:fields: List valid values for bug fields.
-:help: Show help.
-:info: Show detailed information about the given bugs.
-:list: Show a one-line summary of the given bugs.
-:new: File a new bug.
-:products: List the products of a Bugzilla instance.
-:status: Set the status of the given bugs.
+:assign:              Assign bugs to the given user.
+:block:               Show or update block list of given bugs.
+:cc:                  Show or update CC List.
+:comment:             List comments or file a comment on the given bugs.
+:depend:              Show or update dependencies of given bugs.
+:desc:                Show the description of the given bug(s).
+:dump:                Print internal representation of bug data.
+:fields:              List valid values for bug fields.
+:help:                Show help.
+:info:                Show detailed information about the given bugs.
+:list:                Show a one-line summary of the given bugs.
+:new:                 File a new bug.
+:products:            List the products of a Bugzilla instance.
+:status:              Set the status of the given bugs.
+:time:                Show or adjust times and estimates for the given bugs.
+
 
 ``bzlib``
 ---------
@@ -47,3 +51,74 @@ commit message, the list of changed files and other details about the commit.
 .. _Bazaar: http://bazaar.canonical.com/
 .. _Bugzilla: http://www.bugzilla.org/
 .. _Python: http://python.org/
+
+
+Installation
+============
+
+Install via ``pip`` or ``easy_install``::
+
+  pip install bugzillatools
+  -or-
+  easy_install bugzillatools
+
+Local install (make sure ``~/.local/bin`` is on your ``PATH``::
+
+  python setup.py install --user
+
+Global install (run as root)::
+
+  python setup.py install
+
+Note that global install or some manual moving of files is
+required for the Bazaar plugin to be detected by Bazaar.
+
+
+Configuration
+=============
+
+A configuration file is looked for at ``~/.bugzillarc``.  Its format is
+ini-like; the following configuration objects are understood:
+
+``core``
+--------
+
+``server``
+  Name of the default server
+
+``alias``
+---------
+
+  Option names are aliases; their values are the replacement.
+
+``server.<name>``
+-----------------
+
+Define a server.  bugzillatools supports multiple servers; the
+``--server=<name>`` argument can be used to select a server.
+
+``url``
+  Base URL of the Bugzilla server.
+``user``
+  Bugzilla username.
+``password``
+  Bugzilla password
+
+
+Example ``.bugzillarc``
+---------------------
+
+::
+
+  [core]
+  server = example
+
+  [server.example]
+  url = http://bugzilla.example.com
+  user = user@example.com
+  password = sekrit
+
+  [alias]
+  fix = status --status RESOLVED --resolution FIXED
+  wfm = status --status RESOLVED --resolution WORKSFORME
+  confirm = status --status CONFIRMED
