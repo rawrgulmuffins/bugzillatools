@@ -36,7 +36,7 @@ class Config(ConfigParser.SafeConfigParser):
 
     def write(self):
         with open(self._path, 'w') as fp:
-            ConfigParser.SafeConfigParser.write(fp)
+            ConfigParser.SafeConfigParser.write(self, fp)
 
     @classmethod
     def get_config(cls, path):
