@@ -24,7 +24,11 @@ import bzlib.config
 import bzlib.ui
 
 # retrieve user-defined aliases
-aliases = bzlib.config.get('alias') or {}
+conf = bzlib.config.Config.get_config('~/.bugzillarc')
+if conf.has_section('alias'):
+    aliases = dict(conf.items('alias'))
+else:
+    aliases = {}
 
 # format the epilogue
 epilog = None
@@ -40,11 +44,6 @@ _parser = argparse.ArgumentParser(add_help=False)
 # add global arguments
 _parser.add_argument('--version', action='version',
     version='%(prog)s {}'.format(bzlib.version))
-_parser.add_argument('--server', default=bzlib.config.get('default_server'),
-    help='Handle of Bugzilla instance to use')
-_parser.add_argument('--url', help='Base URL of Bugzilla instance')
-_parser.add_argument('--user', help='Bugzilla username')
-_parser.add_argument('--password', help='Bugzilla password')
 
 # parse known args
 args, argv = _parser.parse_known_args()

@@ -17,6 +17,12 @@ Bug fixes
 
 - Bugzilla URLs are now more rigourously sanity checked.
 
+Other changes
+-------------
+
+- Configuration file syntax changed to ini-like (i.e., parsable by
+  ``ConfigParser``).  JSON configuration is no longer supported.
+
 
 bugzillatools-0.3 :: Sun Aug 7 2011
 ===================================

@@ -14,8 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
+import ConfigParser
 import os.path
+import re
 
 
 show_fields = [
@@ -24,27 +25,40 @@ show_fields = [
     'summary',
 ]
 
-default = {}
+
+class ConfigError(Exception):
+    pass
 
 
-def read_config():
-    f = os.path.expanduser('~/.bugzillarc')
-    if not os.path.isfile(f):
-        # file doesn't exist; empty config
-        return None
-    with open(f) as fh:
-        return json.load(fh)
-
-config = read_config()
+def check_section(section):
+    if section in ['core', 'alias'] \
+            or re.match(r'server\.\w+', section):
+        return section
+    raise ConfigError('invalid section: {}'.format(section))
 
 
-def get(key):
-    if not config:
-        return None
-    return config.get(key) or default.get(key)
+class Config(ConfigParser.SafeConfigParser):
+    _instances = {}
+
+    @classmethod
+    def get_config(cls, path):
+        path = os.path.expanduser(path)
+        if path not in cls._instances:
+            cls._instances[path] = cls(path)
+        return cls._instances[path]
+
+    def __init__(self, path):
+        path = os.path.expanduser(path)
+        ConfigParser.SafeConfigParser.__init__(self)
+        self._path = path
+        self.read(self._path)
+
+    def write(self):
+        with open(self._path, 'w') as fp:
+            ConfigParser.SafeConfigParser.write(self, fp)
+
+    def add_section(self, section):
+        ConfigParser.SafeConfigParser.add_section(self, check_section(section))
 
 
-def get_show_fields():
-    return set(show_fields) \
-        - set(get('ignore_fields') or []) \
-        | set(get('show_fields') or [])
+NoSectionError = ConfigParser.NoSectionError

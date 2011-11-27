@@ -27,6 +27,8 @@ import bzrlib.config
 import bzrlib.log
 import bzrlib.trace
 
+conf = bzlib.config.Config.get_config('~/.bugzillarc')
+
 
 def post_commit_hook(
     local, master, old_revno, old_revid, new_revno, new_revid,  # bzrlib args
@@ -62,11 +64,11 @@ def post_commit_hook(
         # see if bzlib knows about this server
         url, user, password = None, None, None
         try:
-            url, user, password = bzlib.config.get('servers').get(tag)
-        except AttributeError:
-            pass  # no servers defined
-        except TypeError:
-            pass  # no server for tag
+            server = dict(conf.items('server.' + tag))
+            url, user, password = \
+                [server.get(k) for k in 'url', 'user', 'password']
+        except bzlib.config.NoSectionError:
+            pass  # server not defined
 
         # url falls back to bzr config (tracker url)
         #

@@ -27,6 +27,8 @@ from . import bugzilla
 from . import config
 from . import editor
 
+conf = config.Config.get_config('~/.bugzillarc')
+
 
 class _ReadFileAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
@@ -115,6 +117,21 @@ def with_limit(things='items', default=None):
     return decorator
 
 
+def with_server(cls):
+    def add_server_args(parser):
+        default = None
+        if conf.has_option('core', 'server'):
+            default = conf.get('core', 'server')
+        group = parser.add_argument_group('server arguments')
+        group.add_argument('--server', default=default,
+            help='Handle of Bugzilla instance to use')
+        group.add_argument('--url', help='Base URL of Bugzilla instance')
+        group.add_argument('--user', help='Bugzilla username')
+        group.add_argument('--password', help='Bugzilla password')
+    cls.args = cls.args + [add_server_args]
+    return cls
+
+
 class Command(object):
     """A command object.
 
@@ -149,9 +166,58 @@ class Command(object):
         self._ui = ui
 
 
+class Config(Command):
+    """Show or update configuration."""
+    args = Command.args + [
+        lambda x: x.add_argument('--list', '-l', action='store_true',
+            help='list all configuration options'),
+        lambda x: x.add_argument('name', nargs='?',
+            help='name of option to show, set or remove'),
+        lambda x: x.add_argument('--remove', action='store_true',
+            help='remove the specified option'),
+        lambda x: x.add_argument('value', nargs='?',
+            help='set value of given option'),
+    ]
+
+    def __call__(self):
+        args = self._args
+        if args.list:
+            for section in conf.sections():
+                for option, value in conf.items(section):
+                    print '{}={}'.format('.'.join((section, option)), value)
+        elif not args.name:
+            raise UserWarning('No configuration option given.')
+        else:
+            try:
+                section, option = args.name.rsplit('.', 1)
+            except ValueError:
+                raise UserWarning('Invalid configuration option.')
+            if not section or not option:
+                raise UserWarning('Invalid configuration option.')
+
+            if args.remove:
+                # remove the option
+                conf.remove_option(section, option)
+                if not conf.items(section):
+                    conf.remove_section(section)
+                conf.write()
+            elif args.value:
+                # set new value
+                if not conf.has_section(section):
+                    conf.add_section(section)
+                oldvalue = conf.get(section, option) \
+                    if conf.has_option(section, option) else None
+                conf.set(section, option, args.value)
+                conf.write()
+                print '{}: {} => {}'.format(args.name, oldvalue, args.value)
+            else:
+                curvalue = conf.get(section, option)
+                print '{}: {}'.format(args.name, curvalue)
+
+
 class Help(Command):
     """Show help."""
-    args = [
+    args = Command.args + [
         lambda x: x.add_argument('subcommand', metavar='SUBCOMMAND', nargs='?',
             help='show help for subcommand')
     ]
@@ -171,20 +237,34 @@ class Help(Command):
                 self._parser.parse_args([self._args.subcommand, '--help'])
 
 
+@with_server
 class BugzillaCommand(Command):
     def __init__(self, *args, **kwargs):
         super(BugzillaCommand, self).__init__(*args, **kwargs)
-        # Get a Bugzilla object.
-        #  Bit of a hack, but there's no nice way to get dict from Namespace
-        self.bz = bugzilla.Bugzilla.from_config(**self._args.__dict__)
+        # construct the Bugzilla object
+        args = self._args
+        server = {}
+        if args.server:
+            try:
+                server = dict(conf.items('server.' + args.server))
+            except config.NoSectionError:
+                raise UserWarning(
+                    "No configuration for server '{}'.".format(args.server)
+                )
+        server.update({
+            k: getattr(args, k)
+            for k in ('url', 'user', 'password')
+            if getattr(args, k)
+        })
+        self.bz = bugzilla.Bugzilla(**server)
 
 
 @with_bugs
 @with_optional_message
 class Assign(BugzillaCommand):
     """Assign bugs to the given user."""
-    args = [
-        lambda x: x.add_argument('--to', metavar='ASSIGNEE',
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--to', metavar='ASSIGNEE', required=True,
             help='New assignee'),
     ]
 
@@ -274,7 +354,7 @@ class CC(BugzillaCommand):
 @with_limit(things='comments')
 class Comment(BugzillaCommand):
     """List comments or file a comment on the given bugs."""
-    args = [
+    args = BugzillaCommand.args + [
         lambda x: x.add_argument('--reverse', action='store_true',
             default=True,
             help='Show from newest to oldest (the default).'),
@@ -362,6 +442,7 @@ class Depend(BugzillaCommand):
 class Desc(BugzillaCommand):
     """Show the description of the given bug(s)."""
     formatstring = 'author: {creator}\ntime: {time}\n\n{text}\n'
+
     def __call__(self):
         def _descfmt(bug):
             desc = self.bz.bug(bug).comments[0]
@@ -408,10 +489,10 @@ class Info(BugzillaCommand):
     """Show detailed information about the given bugs."""
     def __call__(self):
         args = self._args
-        fields = config.get_show_fields()
+        fields = config.show_fields
         for bug in map(self.bz.bug, args.bugs):
             print 'Bug {}:'.format(bug.bugno)
-            fields = config.get_show_fields() & bug.data.viewkeys()
+            fields = config.show_fields & bug.data.viewkeys()
             width = max(map(len, fields)) - min(map(len, fields)) + 2
             for field in fields:
                 print '  {:{}} {}'.format(field + ':', width, bug.data[field])
@@ -423,7 +504,6 @@ class List(BugzillaCommand):
     """Show a one-line summary of the given bugs."""
     def __call__(self):
         args = self._args
-        fields = config.get_show_fields()
         lens = map(lambda x: len(str(x)), args.bugs)
         width = max(lens) - min(lens) + 2
         for bug in map(self.bz.bug, args.bugs):
@@ -559,7 +639,7 @@ class Status(BugzillaCommand):
     status and resolution fields to appropriate values for duplicate bugs.
     """
 
-    args = [
+    args = BugzillaCommand.args + [
         lambda x: x.add_argument('--status',
             help='Specify a resolution (case-insensitive).'),
         lambda x: x.add_argument('--resolution',

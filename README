@@ -19,6 +19,7 @@ The following subcommands are available:
 :block:               Show or update block list of given bugs.
 :cc:                  Show or update CC List.
 :comment:             List comments or file a comment on the given bugs.
+:config:              Show or update configuration.
 :depend:              Show or update dependencies of given bugs.
 :desc:                Show the description of the given bug(s).
 :dump:                Print internal representation of bug data.
@@ -78,15 +79,31 @@ Configuration
 =============
 
 A configuration file is looked for at ``~/.bugzillarc``.  Its format is
-JSON; the following configuration objects are understood:
+INI-like; the following configuration objects are understood:
+
+``core``
+--------
+
+``server``
+  Name of the default server
 
 ``alias``
-  Define command aliases.
-``servers``
-  Define servers.  bugzillatools supports multiple servers; the
-  ``--server=HANDLE`` argument can be used to select a server.
-``default_server``
-  Specify a default server by handle.
+---------
+
+  Option names are aliases; their values are the replacement.
+
+``server.<name>``
+-----------------
+
+Define a server.  bugzillatools supports multiple servers; the
+``--server=<name>`` argument can be used to select a server.
+
+``url``
+  Base URL of the Bugzilla server.
+``user``
+  Bugzilla username.
+``password``
+  Bugzilla password
 
 
 Example ``.bugzillarc``
@@ -94,14 +111,15 @@ Example ``.bugzillarc``
 
 ::
 
-  {
-    "alias": {
-      "fix": "status --status RESOLVED --resolution FIXED",
-      "wfm": "status --status RESOLVED --resolution WORKSFORME",
-      "confirm": "status --status CONFIRMED"
-    },
-    "servers": {
-      "example": ["https://bugzilla.example.com", "user@example.com", "sekrit"]
-    },
-    "default_server": "example"
-  }
+  [core]
+  server = example
+
+  [server.example]
+  url = http://bugzilla.example.com
+  user = user@example.com
+  password = sekrit
+
+  [alias]
+  fix = status --status RESOLVED --resolution FIXED
+  wfm = status --status RESOLVED --resolution WORKSFORME
+  confirm = status --status CONFIRMED

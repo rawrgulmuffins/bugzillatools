@@ -42,45 +42,13 @@ class URLError(Exception):
 
 class Bugzilla(object):
 
-    @classmethod
-    def from_config(cls,
-        server=None, url=None, user=None, password=None,
-        *args, **kwargs
-    ):
-        """Return a Bugzilla instance for the server or credentials given.
+    __slots__ = [
+        '_products', '_fields', '_user_cache',
+        'url', 'user', 'password', 'config',
+        'server',
+    ]
 
-        server
-          Handle of the server to use.
-        url
-          URL to use.  If server given, overrides its URL.
-        user
-          User to use.  If server given, overrides its user.
-        password
-          Password to use.  If server given, overrides its password.
-        """
-        if not (url and user and password):
-            if not server:
-                server = config.get('default_server')
-            if not server:
-                raise UserWarning("No server specified.")
-            try:
-                server = config.get('servers').get(server)
-            except AttributeError:
-                raise UserWarning("No servers defined.")
-            if not server:
-                raise UserWarning(
-                    "No configuration for server '{}'.".format(args.server)
-                )
-            url = url or server[0]
-            user = user or server[1]
-            password = password or server[2]
-        return cls(url, user, password)
-
-    _products = None
-    _fields = None
-    _user_cache = {}
-
-    def __init__(self, url, user, password):
+    def __init__(self, url=None, user=None, password=None, **config):
         """Create a Bugzilla XML-RPC client.
 
         url      : points to a bugzilla instance (base URL; must end in '/')
@@ -88,8 +56,14 @@ class Bugzilla(object):
         password : bugzilla password
         """
 
+        self._products = None
+        self._fields = None
+        self._user_cache = {}
+
+        self.url = url
         self.user = user
         self.password = password
+        self.config = config
 
         parsed_url = urlparse.urlparse(url)
         if not parsed_url.netloc:

@@ -1,11 +1,12 @@
-{
-	"alias": {
-		"fix": "status --status RESOLVED --resolution FIXED",
-		"wfm": "status --status RESOLVED --resolution WORKSFORME",
-		"confirm": "status --status CONFIRMED"
-	},
-	"servers": {
-		"example": ["https://bugzilla.example.com", "user@example.com", "sekrit"]
-	},
-	"default_server": "example"
-}
+[core]
+server = example
+
+[server.example]
+url = http://bugzilla.example.com
+user = user@example.com
+password = sekrit
+
+[alias]
+fix = status --status RESOLVED --resolution FIXED
+wfm = status --status RESOLVED --resolution WORKSFORME
+confirm = status --status CONFIRMED
