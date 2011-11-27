@@ -40,6 +40,13 @@ def check_section(section):
 class Config(ConfigParser.SafeConfigParser):
     _instances = {}
 
+    @classmethod
+    def get_config(cls, path):
+        path = os.path.expanduser(path)
+        if path not in cls._instances:
+            cls._instances[path] = cls(path)
+        return cls._instances[path]
+
     def __init__(self, path):
         path = os.path.expanduser(path)
         ConfigParser.SafeConfigParser.__init__(self)
@@ -49,13 +56,6 @@ class Config(ConfigParser.SafeConfigParser):
     def write(self):
         with open(self._path, 'w') as fp:
             ConfigParser.SafeConfigParser.write(self, fp)
-
-    @classmethod
-    def get_config(cls, path):
-        path = os.path.expanduser(path)
-        if path not in cls._instances:
-            cls._instances[path] = cls(path)
-        return cls._instances[path]
 
     def add_section(self, section):
         ConfigParser.SafeConfigParser.add_section(self, check_section(section))
