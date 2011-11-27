@@ -42,11 +42,13 @@ class URLError(Exception):
 
 class Bugzilla(object):
 
-    _products = None
-    _fields = None
-    _user_cache = {}
+    __slots__ = [
+        '_products', '_fields', '_user_cache',
+        'url', 'user', 'password', 'config',
+        'server',
+    ]
 
-    def __init__(self, url=None, user=None, password=None):
+    def __init__(self, url=None, user=None, password=None, **config):
         """Create a Bugzilla XML-RPC client.
 
         url      : points to a bugzilla instance (base URL; must end in '/')
@@ -54,8 +56,14 @@ class Bugzilla(object):
         password : bugzilla password
         """
 
+        self._products = None
+        self._fields = None
+        self._user_cache = {}
+
+        self.url = url
         self.user = user
         self.password = password
+        self.config = config
 
         parsed_url = urlparse.urlparse(url)
         if not parsed_url.netloc:
