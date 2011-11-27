@@ -166,6 +166,55 @@ class Command(object):
         self._ui = ui
 
 
+class Config(Command):
+    """Show or update configuration."""
+    args = Command.args + [
+        lambda x: x.add_argument('--list', '-l', action='store_true',
+            help='list all configuration options'),
+        lambda x: x.add_argument('name', nargs='?',
+            help='name of option to show, set or remove'),
+        lambda x: x.add_argument('--remove', action='store_true',
+            help='remove the specified option'),
+        lambda x: x.add_argument('value', nargs='?',
+            help='set value of given option'),
+    ]
+
+    def __call__(self):
+        args = self._args
+        if args.list:
+            for section in conf.sections():
+                for option, value in conf.items(section):
+                    print '{}={}'.format('.'.join((section, option)), value)
+        elif not args.name:
+            raise UserWarning('No configuration option given.')
+        else:
+            try:
+                section, option = args.name.rsplit('.', 1)
+            except ValueError:
+                raise UserWarning('Invalid configuration option.')
+            if not section or not option:
+                raise UserWarning('Invalid configuration option.')
+
+            if args.remove:
+                # remove the option
+                conf.remove_option(section, option)
+                if not conf.items(section):
+                    conf.remove_section(section)
+                conf.write()
+            elif args.value:
+                # set new value
+                if not conf.has_section(section):
+                    conf.add_section(section)
+                oldvalue = conf.get(section, option) \
+                    if conf.has_option(section, option) else None
+                conf.set(section, option, args.value)
+                conf.write()
+                print '{}: {} => {}'.format(args.name, oldvalue, args.value)
+            else:
+                curvalue = conf.get(section, option)
+                print '{}: {}'.format(args.name, curvalue)
+
+
 class Help(Command):
     """Show help."""
     args = Command.args + [
