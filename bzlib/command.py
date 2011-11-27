@@ -393,6 +393,7 @@ class Depend(BugzillaCommand):
 class Desc(BugzillaCommand):
     """Show the description of the given bug(s)."""
     formatstring = 'author: {creator}\ntime: {time}\n\n{text}\n'
+
     def __call__(self):
         def _descfmt(bug):
             desc = self.bz.bug(bug).comments[0]
