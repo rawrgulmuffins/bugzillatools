@@ -19,6 +19,7 @@ The following subcommands are available:
 :block:               Show or update block list of given bugs.
 :cc:                  Show or update CC List.
 :comment:             List comments or file a comment on the given bugs.
+:config:              Show or update configuration.
 :depend:              Show or update dependencies of given bugs.
 :desc:                Show the description of the given bug(s).
 :dump:                Print internal representation of bug data.
@@ -78,7 +79,7 @@ Configuration
 =============
 
 A configuration file is looked for at ``~/.bugzillarc``.  Its format is
-ini-like; the following configuration objects are understood:
+INI-like; the following configuration objects are understood:
 
 ``core``
 --------
