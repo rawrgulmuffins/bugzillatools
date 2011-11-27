@@ -16,6 +16,7 @@
 
 import ConfigParser
 import os.path
+import re
 
 
 show_fields = [
@@ -23,6 +24,17 @@ show_fields = [
     'keywords', 'priority', 'component', 'resolution', 'status',
     'summary',
 ]
+
+
+class ConfigError(Exception):
+    pass
+
+
+def check_section(section):
+    if section in ['core', 'alias'] \
+            or re.match(r'server\.\w+', section):
+        return section
+    raise ConfigError('invalid section: {}'.format(section))
 
 
 class Config(ConfigParser.SafeConfigParser):
@@ -44,6 +56,9 @@ class Config(ConfigParser.SafeConfigParser):
         if path not in cls._instances:
             cls._instances[path] = cls(path)
         return cls._instances[path]
+
+    def add_section(self, section):
+        ConfigParser.SafeConfigParser.add_section(self, check_section(section))
 
 
 NoSectionError = ConfigParser.NoSectionError
