@@ -60,7 +60,7 @@ Installation
 Install via ``pip`` or ``easy_install``::
 
   pip install bugzillatools
-  -or-
+    -or-
   easy_install bugzillatools
 
 Local install (make sure ``~/.local/bin`` is on your ``PATH``::
@@ -90,7 +90,7 @@ INI-like; the following configuration objects are understood:
 ``alias``
 ---------
 
-  Option names are aliases; their values are the replacement.
+Option names are aliases; their values are the replacement.
 
 ``server.<name>``
 -----------------
@@ -113,7 +113,7 @@ Define a server.  bugzillatools supports multiple servers; the
 
 
 Example ``.bugzillarc``
----------------------
+-----------------------
 
 ::
 

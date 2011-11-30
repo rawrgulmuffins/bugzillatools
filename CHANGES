@@ -1,10 +1,14 @@
-bugzillatools-dev :: ???
-=========================
+Changelog
+=========
 
-New features
-------------
+bugzillatools-0.4 :: Wed Nov 30 2011
+------------------------------------
+
+New features:
 
 - ``time`` command: show or adjust times and estimates for given bug.
+  At time of writing, limitations in Bugzilla's RPC API prevent the
+  display of cumulative time for a bug.
 - ``desc`` command: show the description of the given bugs.
 - ``dump`` command: print internal representation of bug(s).
 - ``comment`` learned the ``--omit-empty`` and ``--include-empty``
@@ -15,23 +19,20 @@ New features
   to change the status of a bug, using the ``assign_status`` option.
   See README for details.
 
-Bug fixes
----------
+Bug fixes:
 
 - Bugzilla URLs are now more rigourously sanity checked.
 
-Other changes
--------------
+Other changes:
 
 - Configuration file syntax changed to ini-like (i.e., parsable by
   ``ConfigParser``).  JSON configuration is no longer supported.
 
 
 bugzillatools-0.3 :: Sun Aug 7 2011
-===================================
+-----------------------------------
 
-New features
-------------
+New features:
 
 - Added the Bazaar plugin.
 - ``new`` command: file a new bug, prompting user for bug data.
@@ -39,8 +40,7 @@ New features
   to mark a bug as a duplicate of another (Bugzilla with automatically set
   the status and resolution fields to appropriate values).
 
-Bug fixes
----------
+Bug fixes:
 
 - ``status`` only prompts for resolution if new status is closed and
   current status is open (``--resolution`` may still be specified,
@@ -56,10 +56,9 @@ Bug fixes
 
 
 bugzillatools-0.2.1 :: Tue Jul 12 2011
-======================================
+--------------------------------------
 
-Bug fixes
----------
+Bug fixes:
 
 - Support Unicode data in all commands.
 - Do not show 'aliases' heading in ``--help`` output if none defined.
@@ -67,10 +66,9 @@ Bug fixes
 
 
 bugzillatools-0.2 :: Sat Jul 2 2011
-===================================
+-----------------------------------
 
-New features
-------------
+New features:
 
 - ``comment`` now lists bug comments when no comment is given.
   ``--forward``, ``--reverse`` and ``--limit=N`` can be used to control
@@ -93,47 +91,41 @@ New features
   single ``status`` command; commands to suit a particular workflow can be
   defined as aliases of ``status``, with appropriate arguments.
 
-Bug fixes
----------
+Bug fixes:
 
 - Improved server misconfiguration or missing configuration handling.
 - List commands in alphabetical order.
 
-Other changes
--------------
+Other changes:
 
 - The default user configuration file changed to ``~/.bugzillarc``
   (formerly ~/.bugrc).
 
 
 bugzillatools-0.1.2 :: Fri Jun 17 2011
-======================================
+--------------------------------------
 
-Bug fixes
----------
+Bug fixes:
 
 - Fix Bugzilla construction args
 
 
 bugzillatools-0.1.1 :: Tue Jun 14 2011
-======================================
+--------------------------------------
 
-New features
-------------
+New features:
 
 - ``products`` command: list products of a Bugzilla.
 - Describe subcommands in ``--help`` output.
 
-Bug fixes
----------
+Bug fixes:
 
 - Handle server lookup failure when no servers are defined.
 
 
 bugzillatools-0.1 :: Sun Jun 12 2011
-====================================
+------------------------------------
 
-New features
-------------
+New features:
 
 - First release of bugzillatools

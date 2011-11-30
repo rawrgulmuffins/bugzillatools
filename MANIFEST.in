@@ -1,1 +1,3 @@
-include COPYING
+include MANIFEST.in
+include gpl-3.0.txt
+include CHANGES

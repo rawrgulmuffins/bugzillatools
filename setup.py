@@ -4,7 +4,10 @@ import sys
 import bzlib  # import version info
 
 with open('README') as fh:
-    long_description = fh.read()
+    readme = fh.read()
+with open('CHANGES') as fh:
+    changes = fh.read()
+long_description = '\n\n'.join((readme, changes))
 
 distutils.core.setup(
     name='bugzillatools',
