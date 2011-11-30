@@ -138,25 +138,30 @@ class Bug(object):
         self,
         user,
         comment=None,
-        update_status=True,
         match=True
     ):
         """Reassign this bug.
 
         user: the new assignee
         comment: optional comment
-        update_status: change status to ASSIGNED, iff status is currently NEW
         match: search for a user matching the given string
+
+        If the ``assign_status`` config is set for the ``Bugzilla`` and
+        the current status matches the first value, the status will be
+        updated to the second value.
         """
         if match:
             user = self.bz.match_one_user(user)['name']
         kwargs = {'assigned_to': user}
         if comment:
             kwargs['comment'] = {'body': comment}
-        if update_status:
-            # TODO nix this or move to config; not valid in all workflows
-            if self.data['status'] == 'NEW':
-                kwargs['status'] = 'ASSIGNED'
+        if 'assign_status' in self.bz.config:
+            try:
+                froms, to = self.bz.config['assign_status'].split()
+                if self.data['status'] in froms.split(','):
+                    kwargs['status'] = to
+            except:
+                pass  # ignore errors (incorrect config)
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
         if comment:

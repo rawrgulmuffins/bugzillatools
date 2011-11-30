@@ -11,6 +11,9 @@ New features
   arguments; exclude or include empty comments (e.g. additional time
   worked, but no specific comment) from the output.  The default is to
   omit empty comments.
+- The ``assign`` command can now be configured (on a per-server basis)
+  to change the status of a bug, using the ``assign_status`` option.
+  See README for details.
 
 Bug fixes
 ---------

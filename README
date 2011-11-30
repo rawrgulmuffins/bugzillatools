@@ -104,6 +104,12 @@ Define a server.  bugzillatools supports multiple servers; the
   Bugzilla username.
 ``password``
   Bugzilla password
+``assign_status``
+  When the ``assign`` command is used, if the current status of a bug
+  is in the first list, the status will be updated to the second item.
+  The format is: ``<oldstatus>[,<oldstatus>]* <newstatus>``.  An
+  appropriate value for the default Bugzilla workflow might be:
+  ``"UNCONFIRMED,CONFIRMED IN_PROGRESS"``.
 
 
 Example ``.bugzillarc``
