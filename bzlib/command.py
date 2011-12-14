@@ -523,10 +523,13 @@ class New(BugzillaCommand):
         mandatory_fields = filter(lambda x: x['is_mandatory'], fields)
 
         # first choose the product
-        b.data['product'] = self._ui.choose(
-            'Choose a product',
-            map(lambda x: x['name'], self.bz.get_products())
-        )
+        products = [x['name'] for x in self.bz.get_products()]
+        default = None
+        if 'default_product' in self.bz.config \
+                and self.bz.config['default_product'] in products:
+            default = products.index(self.bz.config['default_product'])
+        b.data['product'] = \
+            self._ui.choose('Choose a product', products, default=default)
 
         # fill out other mandatory fields
         for field in mandatory_fields:

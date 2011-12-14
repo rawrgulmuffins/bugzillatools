@@ -110,6 +110,10 @@ Define a server.  bugzillatools supports multiple servers; the
   The format is: ``<oldstatus>[,<oldstatus>]* <newstatus>``.  An
   appropriate value for the default Bugzilla workflow might be:
   ``"UNCONFIRMED,CONFIRMED IN_PROGRESS"``.
+``default_product``
+  If provided and if the provided string corresponds to the name of a
+  product on this server, use that product as the default.  The user
+  will still be prompted to confirm.
 
 
 Example ``.bugzillarc``
