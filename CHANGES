@@ -1,6 +1,16 @@
 Changelog
 =========
 
+bugzillatools-dev :: ???
+------------------------
+
+New features:
+
+- ``new`` command: new config ``server.<name>.default_product``, if set
+  and if corresponding to a product on the server, specifies the default
+  product.
+
+
 bugzillatools-0.4 :: Wed Nov 30 2011
 ------------------------------------
 
