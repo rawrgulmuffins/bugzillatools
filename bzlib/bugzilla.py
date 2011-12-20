@@ -78,7 +78,7 @@ class Bugzilla(object):
             )
         url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
         # httplib explodes if url is unicode
-        self.server = xmlrpclib.ServerProxy(str(url))
+        self.server = xmlrpclib.ServerProxy(str(url), use_datetime=True)
 
     def rpc(self, *args, **kwargs):
         """Do an RPC on the Bugzilla server.
