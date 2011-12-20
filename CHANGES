@@ -6,6 +6,7 @@ bugzillatools-dev :: ???
 
 New features:
 
+- ``history`` command: display bug history.
 - ``new`` command: new config ``server.<name>.default_product``, if set
   and if corresponding to a product on the server, specifies the default
   product.

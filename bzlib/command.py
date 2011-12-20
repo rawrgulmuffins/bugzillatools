@@ -484,6 +484,36 @@ class Fields(BugzillaCommand):
                     print '  ', ','.join(map(lambda x: x['name'], values))
 
 
+def _format_history(history):
+    """Return a generator of formatted lines of history."""
+    widths = [max(len(str(h[i])) for h in history) for i in range(5)]
+    template = '{:{}}'
+    return (' | '.join(
+        (itertools.starmap(template.format, zip(map(str, h), widths)))
+    ) for h in history)
+
+
+@with_bugs
+class History(BugzillaCommand):
+    """Show the history of the given bugs."""
+    def __call__(self):
+        fields = ('WHO', 'WHEN', 'WHAT', 'REMOVED', 'ADDED')
+        for bug in map(self.bz.bug, self._args.bugs):
+            history = []
+            for h in bug.history:
+                _history = [
+                    ['', '', c['field_name'], c['removed'], c['added']]
+                    for c in h['changes']
+                ]
+                _history[0][0] = h['who']
+                _history[0][1] = h['when']
+                history.extend(_history)
+            print 'History of Bug {}:'.format(bug.bugno)
+            for line in _format_history(history):
+                print '  ' + line
+            print
+
+
 @with_bugs
 class Info(BugzillaCommand):
     """Show detailed information about the given bugs."""

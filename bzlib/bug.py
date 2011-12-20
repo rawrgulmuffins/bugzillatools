@@ -32,6 +32,19 @@ class Bug(object):
         self._data = value
 
     @property
+    def history(self):
+        if self._history is None:
+            if not self.bugno:
+                raise Exception("bugno not provided.")
+            self._history = \
+                self.rpc('history', ids=[self.bugno])['bugs'][0]['history']
+        return self._history
+
+    @history.setter
+    def history(self, value):
+        self._history = value
+
+    @property
     def comments(self):
         if self._comments is None:
             if not self.bugno:
@@ -63,6 +76,7 @@ class Bug(object):
         self.bugno = None
         self.data = None
         self.comments = None
+        self.history = None
         try:
             self.bugno = int(bugno_or_data)
         except TypeError:
@@ -101,6 +115,7 @@ class Bug(object):
     def add_comment(self, comment):
         self.rpc('add_comment', id=self.bugno, comment=comment)
         self.comments = None  # comments are stale
+        self.history = None  # history is stale
 
     def is_open(self):
         """Return True if the bug is open, otherwise False."""
@@ -113,6 +128,7 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale
 
@@ -131,6 +147,7 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale
 
@@ -164,6 +181,7 @@ class Bug(object):
                 pass  # ignore errors (incorrect config)
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
                 self.comments = None  # comments are stale
 
@@ -196,6 +214,7 @@ class Bug(object):
 
         result = self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if 'comment' in kwargs:
             self.comments = None  # comments are stale
         return result
@@ -219,6 +238,7 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale
 
@@ -240,6 +260,7 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale
 
@@ -260,5 +281,6 @@ class Bug(object):
             kwargs['comment'] = {'body': comment}
         self.rpc('update', ids=[self.bugno], **kwargs)
         self.data = None  # data is stale
+        self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale

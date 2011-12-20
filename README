@@ -25,6 +25,7 @@ The following subcommands are available:
 :dump:                Print internal representation of bug data.
 :fields:              List valid values for bug fields.
 :help:                Show help.
+:history:             Show the history of the given bugs.
 :info:                Show detailed information about the given bugs.
 :list:                Show a one-line summary of the given bugs.
 :new:                 File a new bug.
