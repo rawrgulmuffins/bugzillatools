@@ -741,9 +741,70 @@ class Status(BugzillaCommand):
         )
 
 
-#class Search(BugzillaCommand):
-#    """Search for bugs with supplied attributes."""
-#    pass
+def _make_set_argument(arg):
+    template = 'Only match bugs {{}}of the given {}({})'.format(
+        arg, 's' if arg[-1] != 's' else 'es')
+    return [
+        lambda x: x.add_argument('--' + arg, nargs='+',
+            metavar=arg.upper(),
+            help=template.format('')),
+        lambda x: x.add_argument('--not-' + arg, nargs='+',
+            metavar=arg.upper(),
+            help=template.format('NOT ')),
+    ]
+
+
+class Search(BugzillaCommand):
+    """Search for bugs matching given criteria.
+
+    If both '--foo' and '--not-foo' are given for any argument 'foo',
+    the former takes precendence.
+    """
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--summary', nargs='+',
+            help='Match summary against any of the given substrings.'),
+    ]
+    set_arguments = 'product', 'component', 'status', 'resolution'
+    for x in set_arguments:
+        args.extend(_make_set_argument(x))
+
+    def __call__(self):
+        kwargs = {}
+
+        # simple args
+        for arg in ['summary']:
+            value = getattr(self._args, arg)
+            if value:
+                kwargs[arg] = value
+
+        # set args
+        for arg in self.set_arguments:
+            if getattr(self._args, arg):
+                kwargs[arg] = getattr(self._args, arg)
+            elif getattr(self._args, 'not_' + arg):
+                values = set(getattr(self._args, 'not_' + arg))
+                if arg == 'product':
+                    all_values = set(x['name'] for x in self.bz.get_products())
+                else:
+                    all_values = set(
+                        value['name'] for value in
+                        [
+                            field['values'] for field in self.bz.get_fields()
+                            if field['name'] == arg
+                        ][0]
+                    )
+                kwargs[arg] = list(all_values - values)
+
+        bugs = list(bug.Bug.search(self.bz, **kwargs))
+        lens = [len(str(b.bugno)) for b in bugs]
+        width = max(lens) - min(lens) + 2
+
+        for _bug in bugs:
+            print 'Bug {:{}} {}'.format(
+                str(_bug.bugno) + ':', width, _bug.data['summary']
+            )
+        n = len(bugs)
+        print '=> {} bug{} matched criteria'.format(n, 's' if n else '')
 
 
 @with_bugs
