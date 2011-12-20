@@ -534,7 +534,7 @@ class List(BugzillaCommand):
     """Show a one-line summary of the given bugs."""
     def __call__(self):
         args = self._args
-        lens = map(lambda x: len(str(x)), args.bugs)
+        lens = [len(str(x)) for x in args.bugs]
         width = max(lens) - min(lens) + 2
         for bug in map(self.bz.bug, args.bugs):
             print 'Bug {:{}} {}'.format(
