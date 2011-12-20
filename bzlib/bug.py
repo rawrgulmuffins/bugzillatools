@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import functools
 import itertools
 
 
@@ -59,8 +60,21 @@ class Bug(object):
         self._comments = value
 
     @classmethod
-    def search(cls, bz, args):
-        pass
+    def search(cls, bz, **kwargs):
+        """Return bugs matching the search criteria."""
+        fields = frozenset([
+            'alias', 'assigned_to', 'component', 'creation_time', 'creator',
+            'id', 'last_change_time', 'op_sys', 'platform', 'priority',
+            'product', 'resolution', 'severity', 'status', 'summary',
+            'target_milestone', 'qa_contact', 'url', 'version', 'whiteboard',
+            'limit', 'offset',
+        ])
+        unknowns = kwargs.viewkeys() - fields
+        if unknowns:
+            # unknown arguments
+            raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
+        _cls = functools.partial(cls, bz)  # curry constructor with bz
+        return map(_cls, bz.rpc('Bug', 'search', **kwargs)['bugs'])
 
     def __init__(self, bz, bugno_or_data=None):
         """Create a bug object.
@@ -82,6 +96,7 @@ class Bug(object):
             self.bugno = int(bugno_or_data)
         except TypeError:
             self.data = bugno_or_data or {}
+            self.bugno = int(self.data.get('id'))
 
     def rpc(self, *args, **kwargs):
         """Does an RPC on the Bugzilla server.
