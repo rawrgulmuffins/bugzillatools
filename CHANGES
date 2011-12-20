@@ -11,6 +11,10 @@ New features:
   and if corresponding to a product on the server, specifies the default
   product.
 
+Bug fixes:
+
+- ``time`` command: calculate the hours worked on a bug.
+
 
 bugzillatools-0.4 :: Wed Nov 30 2011
 ------------------------------------

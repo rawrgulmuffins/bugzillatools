@@ -774,9 +774,9 @@ class Time(BugzillaCommand):
         else:
             # display
             #
-            # as of Bugzilla 4.0.1, "total hours worked" cannot be known.
-            # Hours are accumulated in the 'work_time' attribute of comments,
-            # which is not present in bug.comments RPC output.
+            # As of Bugzilla 4.0.1, "actual_time" (total hours worked) is
+            # not returned in bug.get.  It can, however, be calculated from
+            # the bug history.
             bugs = (self.bz.bug(bug) for bug in args.bugs)
             for bug in bugs:
                 # if user is not in the "time-tracking" group, the fields will
@@ -789,7 +789,7 @@ class Time(BugzillaCommand):
                 print '  Estimated time: {}'.format(bug.data['estimated_time'])
                 print '  Remaining time: {}'.format(bug.data['remaining_time'])
                 print '  Deadline:       {}'.format(bug.data['deadline'])
-                print '  Time worked:    {}'.format('<not available>')
+                print '  Time worked:    {}'.format(bug.actual_time())
 
 
 # the list got too long; metaprogram it ^_^

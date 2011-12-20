@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import itertools
 
 
 class Bug(object):
@@ -284,3 +285,17 @@ class Bug(object):
         self.history = None  # history is stale
         if comment:
             self.comments = None  # comments are stale
+
+    def actual_time(self):
+        """Calculate the actual hours worked on a bug.
+
+        Hopefully this will one day be available via rpc('get', ...), but
+        for the time being, we have to use the history to calculate it.
+        """
+        changesets = (changeset['changes'] for changeset in self.history)
+        hours = (
+            float(change['added'])
+            for change in itertools.chain.from_iterable(changesets)
+            if change['field_name'] == 'work_time'
+        )
+        return sum(hours)
