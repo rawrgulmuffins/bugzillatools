@@ -19,6 +19,8 @@ import math
 import re
 import sys
 
+from . import bugzilla as _bugzilla
+
 curry = functools.partial
 
 
@@ -150,6 +152,20 @@ def filter_text(string, default=None):
         raise InvalidInputError
 
 
+def filter_user(string, bugzilla=None, default=None):
+    """Match to a single user and return the user name.
+
+    ``bugzilla``
+      A ``bzlib.bugzilla.Bugzilla``.
+    """
+    if not string and default:
+        return None
+    try:
+        return bugzilla.match_one_user(string)['name']
+    except _bugzilla.UserError as e:
+        raise InvalidInputError(e.message)
+
+
 class UI(object):
     def show(self, msg):
         print msg
@@ -181,6 +197,13 @@ class UI(object):
         prompt = prompt if prompt is not None else 'Enter some text'
         prompt += " [{0}]: ".format(default) if default is not None else ': '
         return self.input(curry(filter_text, default=default), prompt)
+
+    def user(self, prompt, bugzilla=None, default=None):
+        """Prompt the user for a username on the given ``Bugzilla``."""
+        prompt = prompt if prompt is not None else 'Enter a user name'
+        prompt += " [{}]: ".format(default) if default is not None else ': '
+        return self.input(
+            curry(filter_user, bugzilla=bugzilla, default=default), prompt)
 
     def bugno(self, prompt, default=None):
         prompt = prompt if prompt is None else 'Enter an bug number'

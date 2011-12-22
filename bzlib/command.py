@@ -18,6 +18,7 @@ from __future__ import unicode_literals
 
 import argparse
 import datetime
+import functools
 import itertools
 import re
 import textwrap
@@ -597,10 +598,9 @@ class New(BugzillaCommand):
         ]
 
         # let user choose which of these other fields to define
-        optional_fields = [ \
-            x['display_name'] for x in fields \
-            if x['name'] in create_fields \
-                and x['name'] not in b.data.viewkeys()
+        optional_fields = [
+            x['display_name'] for x in fields
+            if x['name'] in create_fields and x['name'] not in b.data
         ]
 
         # prompt user for the fields they wish to define
@@ -626,9 +626,12 @@ class New(BugzillaCommand):
                 )
             else:
                 # TODO take field types into account
-                b.data[field['name']] = self._ui.text(
-                    'Enter the {}'.format(field['display_name'])
-                )
+                if field['name'] == 'assigned_to':
+                    _input = functools.partial(self._ui.user, bugzilla=self.bz)
+                else:
+                    _input = self._ui.text
+                b.data[field['name']] = \
+                    _input('Enter the {}'.format(field['display_name']))
 
         # create the bug
         id = b.create()
