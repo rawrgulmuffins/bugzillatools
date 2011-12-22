@@ -28,6 +28,8 @@ class BugTestCase(unittest.TestCase):
     def test_search(self):
         with self.assertRaisesRegexp(TypeError, r'\bfoobar\b'):
             bug.Bug.search(self.bz, foobar='baz')
+        with self.assertRaisesRegexp(TypeError, r'\bfoobar\b'):
+            bug.Bug.search(self.bz, not_foobar='baz')
         fields = frozenset([
             'alias', 'assigned_to', 'component', 'creation_time', 'creator',
             'id', 'last_change_time', 'op_sys', 'platform', 'priority',
@@ -37,3 +39,8 @@ class BugTestCase(unittest.TestCase):
         ])
         with self.assertRaises(socket.gaierror):
             bug.Bug.search(self.bz, **{field: 'foo' for field in fields})
+        with self.assertRaises(socket.gaierror):
+            bug.Bug.search(
+                self.bz,
+                **{field: 'not_' + 'foo' for field in fields}
+            )

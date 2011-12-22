@@ -767,36 +767,21 @@ class Search(BugzillaCommand):
         lambda x: x.add_argument('--summary', nargs='+',
             help='Match summary against any of the given substrings.'),
     ]
+    simple_arguments = ['summary']
     set_arguments = 'product', 'component', 'status', 'resolution'
     for x in set_arguments:
         args.extend(_make_set_argument(x))
 
     def __call__(self):
-        kwargs = {}
-
-        # simple args
-        for arg in ['summary']:
-            value = getattr(self._args, arg)
-            if value:
-                kwargs[arg] = value
-
-        # set args
-        for arg in self.set_arguments:
-            if getattr(self._args, arg):
-                kwargs[arg] = getattr(self._args, arg)
-            elif getattr(self._args, 'not_' + arg):
-                values = set(getattr(self._args, 'not_' + arg))
-                if arg == 'product':
-                    all_values = set(x['name'] for x in self.bz.get_products())
-                else:
-                    all_values = set(
-                        value['name'] for value in
-                        [
-                            field['values'] for field in self.bz.get_fields()
-                            if field['name'] == arg
-                        ][0]
-                    )
-                kwargs[arg] = list(all_values - values)
+        kwargs = {
+            arg: getattr(self._args, arg)
+            for arg in itertools.chain(
+                self.simple_arguments,
+                self.set_arguments,
+                ('not_' + x for x in self.set_arguments)
+            )
+            if getattr(self._args, arg)
+        }
 
         bugs = list(bug.Bug.search(self.bz, **kwargs))
         lens = [len(str(b.bugno)) for b in bugs]

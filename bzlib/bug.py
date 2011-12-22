@@ -61,7 +61,13 @@ class Bug(object):
 
     @classmethod
     def search(cls, bz, **kwargs):
-        """Return bugs matching the search criteria."""
+        """Return bugs matching the search criteria.
+
+        Values for fields are specified as keyword args.  For fields
+        with sets of valid values, appending ``"not_"`` to the field
+        negates the criterion.  If both forms are provided ("in" and
+        "not in"), the "in" criterion take precedence.
+        """
         fields = frozenset([
             'alias', 'assigned_to', 'component', 'creation_time', 'creator',
             'id', 'last_change_time', 'op_sys', 'platform', 'priority',
@@ -69,10 +75,33 @@ class Bug(object):
             'target_milestone', 'qa_contact', 'url', 'version', 'whiteboard',
             'limit', 'offset',
         ])
+
+        # search kwargs for "not in" args and converts to an "in",
+        # unless an "in" already exists
+        for _not_in in (k for k in kwargs if k.startswith('not_')):
+            _in = _not_in[4:]
+            if _in not in fields:
+                raise TypeError('Invalid keyword argument: {}.'.format(_in))
+            if _in not in kwargs:
+                # set _in version (_in takes precedence if it's already set)
+                if _in == 'product':
+                    all_values = set(x['name'] for x in bz.get_products())
+                else:
+                    all_values = set(
+                        value['name'] for value in
+                        [
+                            field['values'] for field in bz.get_fields()
+                            if field['name'] == _in
+                        ][0]
+                    )
+                kwargs[_in] = list(all_values - frozenset(kwargs[_not_in]))
+            del kwargs[_not_in]  # delete the _not_in
+
         unknowns = kwargs.viewkeys() - fields
         if unknowns:
             # unknown arguments
-            raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
+            raise TypeError(
+                'Invalid keyword arguments: {}.'.format(', '.join(unknowns)))
         _cls = functools.partial(cls, bz)  # curry constructor with bz
         return map(_cls, bz.rpc('Bug', 'search', **kwargs)['bugs'])
 
