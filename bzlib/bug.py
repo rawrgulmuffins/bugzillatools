@@ -67,6 +67,9 @@ class Bug(object):
         with sets of valid values, appending ``"not_"`` to the field
         negates the criterion.  If both forms are provided ("in" and
         "not in"), the "in" criterion take precedence.
+
+        Return an Iterable of bugs (caller must not assume that the
+        value returned is a Sequence).
         """
         fields = frozenset([
             'alias', 'assigned_to', 'component', 'creation_time', 'creator',
@@ -127,6 +130,10 @@ class Bug(object):
             self.data = bugno_or_data or {}
             if 'id' in self.data:
                 self.bugno = int(self.data['id'])
+
+    @property
+    def id(self):
+        return self.bugno
 
     def rpc(self, *args, **kwargs):
         """Does an RPC on the Bugzilla server.
