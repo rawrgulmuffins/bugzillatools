@@ -96,7 +96,8 @@ class Bug(object):
             self.bugno = int(bugno_or_data)
         except TypeError:
             self.data = bugno_or_data or {}
-            self.bugno = int(self.data.get('id'))
+            if 'id' in self.data:
+                self.bugno = int(self.data['id'])
 
     def rpc(self, *args, **kwargs):
         """Does an RPC on the Bugzilla server.
