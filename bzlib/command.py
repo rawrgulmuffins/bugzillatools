@@ -242,22 +242,7 @@ class Help(Command):
 class BugzillaCommand(Command):
     def __init__(self, *args, **kwargs):
         super(BugzillaCommand, self).__init__(*args, **kwargs)
-        # construct the Bugzilla object
-        args = self._args
-        server = {}
-        if args.server:
-            try:
-                server = dict(conf.items('server.' + args.server))
-            except config.NoSectionError:
-                raise UserWarning(
-                    "No configuration for server '{}'.".format(args.server)
-                )
-        server.update({
-            k: getattr(args, k)
-            for k in ('url', 'user', 'password')
-            if getattr(args, k)
-        })
-        self.bz = bugzilla.Bugzilla(**server)
+        self.bz = bugzilla.Bugzilla.from_config(conf, **self._args.__dict__)
 
 
 @with_bugs

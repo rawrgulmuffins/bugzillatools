@@ -41,12 +41,40 @@ class URLError(Exception):
 
 
 class Bugzilla(object):
+    """A Bugzilla server."""
 
     __slots__ = [
         '_products', '_fields', '_user_cache',
         'url', 'user', 'password', 'config',
         'server',
     ]
+
+    @classmethod
+    def from_config(cls, conf, **kwargs):
+        """Instantiate a Bugzilla according to given Config and args.
+
+        The 'server', 'url', 'user' and 'password' keyword arguments are
+        required, but may be ``None``.
+        """
+        mandatory_args = set(['server', 'url', 'user', 'password'])
+        mandatory_args -= kwargs.viewkeys()
+        if mandatory_args:
+            raise TypeError('Mandatory args ({}) not supplied'.format(
+                ', '.join("'{}'".format(arg) for arg in mandatory_args)))
+
+        _server = {}
+        if kwargs['server']:
+            try:
+                _server = dict(conf.items('server.' + kwargs['server']))
+            except config.NoSectionError:
+                raise UserWarning(
+                    "No configuration for server '{}'."
+                    .format(kwargs['server'])
+                )
+        _server.update(
+            {k: kwargs[k] for k in ('url', 'user', 'password') if kwargs[k]}
+        )
+        return cls(**_server)
 
     def __init__(self, url=None, user=None, password=None, **config):
         """Create a Bugzilla XML-RPC client.
