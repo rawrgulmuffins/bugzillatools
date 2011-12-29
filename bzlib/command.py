@@ -120,13 +120,9 @@ def with_limit(things='items', default=None):
 
 def with_server(cls):
     def add_server_args(parser):
-        default = None
-        if conf.has_option('core', 'server'):
-            default = conf.get('core', 'server')
         group = parser.add_argument_group('server arguments')
-        group.add_argument('--server', default=default,
-            help='Handle of Bugzilla instance to use')
-        group.add_argument('--url', help='Base URL of Bugzilla instance')
+        group.add_argument('--server', help='name of Bugzilla server to use')
+        group.add_argument('--url', help='base URL of Bugzilla server')
         group.add_argument('--user', help='Bugzilla username')
         group.add_argument('--password', help='Bugzilla password')
     cls.args = cls.args + [add_server_args]

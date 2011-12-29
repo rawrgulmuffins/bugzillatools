@@ -138,3 +138,10 @@ class FromConfigTestCase(unittest.TestCase):
         self.assertEqual(bz.user, 'jbloggs')
         self.assertEqual(bz.password, 'letmein')
         self.assertEqual(bz.config, {'foo': 'bar'})
+
+    def test_from_config_with_default_server(self):
+        """Test that the default server gets used."""
+        mandatory_args = set(['server', 'url', 'user', 'password'])
+        kwargs = {k: None for k in mandatory_args}
+        bz = bugzilla.Bugzilla.from_config(self._conf, **kwargs)
+        self.assertEqual(bz.url, 'http://bugzilla.example.com/')

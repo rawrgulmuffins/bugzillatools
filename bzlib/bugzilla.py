@@ -62,6 +62,9 @@ class Bugzilla(object):
             raise TypeError('Mandatory args ({}) not supplied'.format(
                 ', '.join("'{}'".format(arg) for arg in mandatory_args)))
 
+        if kwargs['server'] is None and conf.has_option('core', 'server'):
+            kwargs['server'] = conf.get('core', 'server')
+
         _server = {}
         if kwargs['server']:
             try:
