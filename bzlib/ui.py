@@ -1,5 +1,5 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Fraser Tweedale
+# Copyright (C) 2011, 2012 Fraser Tweedale, Benon Technologies Pty Ltd
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ def filter_int(string, default=None, start=None, stop=None):
             # empty string, default was given
             return default
         else:
-            raise InvalidInputError('not an integer: {}'.format(string))
+            raise InvalidInputError('not an int: {!r}'.format(string))
 
 
 def filter_list(
@@ -102,18 +102,23 @@ def filter_list(
     duplicates are filtered out, if the duplicate filtering behaviour
     is used.
     """
+    if filter is None:
+        raise TypeError("argument 'filter' not given")
     if not string and default is not None:
         return default
-    values = [filter(s) for s in re.split(r'[\s:;,]+', string)]
+    strs = re.split(r'[\s:;,]+', string)
+    strs = strs[1:] if strs and not strs[0] else strs
+    strs = strs[:-1] if strs and not strs[-1] else strs
+    values = [filter(s) for s in strs]
     valueset = set(values)
     if len(valueset) != len(values):
         if not allow_duplicates:
-            raise InvalidInputError('duplicates values are not allowed')
+            raise InvalidInputError('duplicate values are not allowed')
         if filter_duplicates:
             values = list(valueset)
     if min_allowed is not None and len(values) < min_allowed:
         raise InvalidInputError('too few values supplied')
-    if max_allowed is not None and len(values) >= max_allowed:
+    if max_allowed is not None and len(values) > max_allowed:
         raise InvalidInputError('too many values supplied')
     return values
 
