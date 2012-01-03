@@ -11,8 +11,8 @@ New features:
 - ``new`` command: new config ``server.<name>.default_product``, if set
   and if corresponding to a product on the server, specifies the default
   product.
-- ``new`` command: perform user matching when assigning the bug during
-  bug creation.
+- ``new`` command: perform user matching when specifying the assignee or
+  cc list during bug creation.
 
 Bug fixes:
 

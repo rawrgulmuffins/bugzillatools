@@ -72,26 +72,22 @@ def filter_int(string, default=None, start=None, stop=None):
             raise InvalidInputError('not an integer: {}'.format(string))
 
 
-def filter_int_list(
+def filter_list(
     string,
     default=None,
-    start=None,
-    stop=None,
+    filter=None,
     min_allowed=None,
     max_allowed=None,
     allow_duplicates=True,
     filter_duplicates=True
 ):
-    """Return a list of integers in the given range, or the default list.
+    """Return a list of values, or the default list.
 
     string
-      A string of ints delimited by commas, colons, semicolons and whitespace.
+      A string of values delimited by commas, colons, semicolons and
+      whitespace.
     default
-      A list of integers (possibly empty), or None.
-    start
-      The minimum value that can appear (inclusive), or None.
-    stop
-      The upper bound of the range (exclusive), or None.
+      A list of values (possibly empty), or None.
     min_allowed
       The minimum number of responses allowed (inclusive), or None.
     max_allowed
@@ -108,22 +104,18 @@ def filter_int_list(
     """
     if not string and default is not None:
         return default
-    pattern = re.compile(r'[\s:;,]+')
-    strs = filter(None, pattern.split(string))
-    if not strs:
-        raise InvalidInputError('not a list of integers')
-    ints = map(curry(filter_int, start=start, stop=stop), strs)
-    intset = set(ints)
-    if len(intset) != len(ints):
+    values = [filter(s) for s in re.split(r'[\s:;,]+', string)]
+    valueset = set(values)
+    if len(valueset) != len(values):
         if not allow_duplicates:
-            raise InvalidInputError('duplicates are not allowed')
+            raise InvalidInputError('duplicates values are not allowed')
         if filter_duplicates:
-            ints = list(intset)
-    if min_allowed is not None and len(ints) < min_allowed:
+            values = list(valueset)
+    if min_allowed is not None and len(values) < min_allowed:
         raise InvalidInputError('too few values supplied')
-    if max_allowed is not None and len(ints) >= max_allowed:
+    if max_allowed is not None and len(values) >= max_allowed:
         raise InvalidInputError('too many values supplied')
-    return ints
+    return values
 
 
 def filter_decimal(string, default=None, lower=None, upper=None):
@@ -204,6 +196,19 @@ class UI(object):
         prompt += " [{}]: ".format(default) if default is not None else ': '
         return self.input(
             curry(filter_user, bugzilla=bugzilla, default=default), prompt)
+
+    def user_list(self, prompt, bugzilla=None, default=None):
+        """Prompt the user for a list of usernames on the ``Bugzilla``."""
+        prompt = prompt if prompt is not None else 'Enter a user name'
+        prompt += " [{}]: ".format(default) if default is not None else ': '
+        return self.input(
+            curry(
+                filter_list,
+                default=default,
+                filter=curry(filter_user, bugzilla=bugzilla)
+            ),
+            prompt
+        )
 
     def bugno(self, prompt, default=None):
         prompt = prompt if prompt is None else 'Enter an bug number'
@@ -293,10 +298,9 @@ class UI(object):
             else ': '
         indices = self.input(
             curry(
-                filter_int_list,
+                filter_list,
                 default=default,
-                start=0,
-                stop=len(items),
+                filter=curry(filter_int, start=0, stop=len(items)),
                 min_allowed=min_allowed,
                 max_allowed=max_allowed
             ),

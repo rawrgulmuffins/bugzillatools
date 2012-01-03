@@ -28,6 +28,8 @@ from . import bugzilla
 from . import config
 from . import editor
 
+curry = functools.partial
+
 conf = config.Config.get_config('~/.bugzillarc')
 
 
@@ -608,7 +610,9 @@ class New(BugzillaCommand):
             else:
                 # TODO take field types into account
                 if field['name'] == 'assigned_to':
-                    _input = functools.partial(self._ui.user, bugzilla=self.bz)
+                    _input = curry(self._ui.user, bugzilla=self.bz)
+                if field['name'] == 'cc':
+                    _input = curry(self._ui.user_list, bugzilla=self.bz)
                 else:
                     _input = self._ui.text
                 b.data[field['name']] = \
