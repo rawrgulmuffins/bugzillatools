@@ -30,6 +30,7 @@ The following subcommands are available:
 :list:                Show a one-line summary of the given bugs.
 :new:                 File a new bug.
 :products:            List the products of a Bugzilla instance.
+:search:              Search for bugs matching given criteria.
 :status:              Set the status of the given bugs.
 :time:                Show or adjust times and estimates for the given bugs.
 
