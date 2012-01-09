@@ -623,6 +623,19 @@ class New(BugzillaCommand):
         self._ui.show('Created Bug {}'.format(id))
 
 
+@with_bugs
+class Priority(BugzillaCommand):
+    """Set the priority on the given bugs."""
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--priority', required=True,
+            help='new priority'),
+    ]
+
+    def __call__(self):
+        for bug in (self.bz.bug(x) for x in self._args.bugs):
+            bug.update(priority=self._args.priority)
+
+
 class Products(BugzillaCommand):
     """List the products of a Bugzilla instance."""
     def __call__(self):
