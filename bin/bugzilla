@@ -43,7 +43,7 @@ epilog = 'user-defined aliases:\n' + '\n'.join(lines) if lines else None
 _parser = argparse.ArgumentParser(add_help=False)
 
 # add global arguments
-_parser.add_argument('--version', action='version',
+_parser.add_argument('-V', action='version',
     version='%(prog)s {}'.format(bzlib.version))
 
 # parse known args

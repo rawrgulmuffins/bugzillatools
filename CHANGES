@@ -9,6 +9,12 @@ New features:
 - ``priority`` command: set the priority of the given bugs
 
 
+Other changes:
+
+- ``-V`` replaces ``--version`` for displaying program version
+  information.
+
+
 bugzillatools-0.5 :: Tue Jan 3 2012
 -----------------------------------
 
