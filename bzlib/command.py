@@ -445,6 +445,26 @@ class Dump(BugzillaCommand):
         print '\n'.join(str((x.data, x.comments)) for x in bugs)
 
 
+@with_bugs
+class Edit(BugzillaCommand):
+    """Edit the given bugs."""
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--priority',
+            help='new priority'),
+        lambda x: x.add_argument('--version',
+            help='new version'),
+    ]
+    _fields = frozenset(['priority', 'version'])
+
+    def __call__(self):
+        for bug in (self.bz.bug(x) for x in self._args.bugs):
+            kwargs = {
+                k: getattr(self._args, k)
+                for k in self._fields & self._args.__dict__.viewkeys()
+            }
+            bug.update(**kwargs)
+
+
 class Fields(BugzillaCommand):
     """List valid values for bug fields."""
     def __call__(self):
@@ -766,7 +786,7 @@ class Search(BugzillaCommand):
             help='Match summary against any of the given substrings.'),
     ]
     simple_arguments = ['summary']
-    set_arguments = 'product', 'component', 'status', 'resolution'
+    set_arguments = 'product', 'component', 'status', 'resolution', 'version'
     for x in set_arguments:
         args.extend(_make_set_argument(x))
 

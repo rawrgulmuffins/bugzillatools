@@ -23,6 +23,7 @@ The following subcommands are available:
 :depend:              Show or update dependencies of given bugs.
 :desc:                Show the description of the given bug(s).
 :dump:                Print internal representation of bug data.
+:edit:                Edit the given bugs.
 :fields:              List valid values for bug fields.
 :help:                Show help.
 :history:             Show the history of the given bugs.
