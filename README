@@ -29,6 +29,7 @@ The following subcommands are available:
 :info:                Show detailed information about the given bugs.
 :list:                Show a one-line summary of the given bugs.
 :new:                 File a new bug.
+:priority:            Set the priority on the given bugs.
 :products:            List the products of a Bugzilla instance.
 :search:              Search for bugs matching given criteria.
 :status:              Set the status of the given bugs.
