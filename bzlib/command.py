@@ -631,7 +631,7 @@ class New(BugzillaCommand):
                 # TODO take field types into account
                 if field['name'] == 'assigned_to':
                     _input = curry(self._ui.user, bugzilla=self.bz)
-                if field['name'] == 'cc':
+                elif field['name'] == 'cc':
                     _input = curry(self._ui.user_list, bugzilla=self.bz)
                 else:
                     _input = self._ui.text
