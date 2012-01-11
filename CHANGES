@@ -6,8 +6,8 @@ bugzillatools-dev :: ???
 
 New features:
 
-- ``priority`` command: set the priority of the given bugs
-
+- The new ``edit`` command replaces the ``assign`` and ``status``
+  commands, and also allows editing of priority and version.
 
 Other changes:
 
