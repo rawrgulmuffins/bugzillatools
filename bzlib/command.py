@@ -243,25 +243,6 @@ class BugzillaCommand(Command):
         self.bz = bugzilla.Bugzilla.from_config(conf, **self._args.__dict__)
 
 
-@with_bugs
-@with_optional_message
-class Assign(BugzillaCommand):
-    """Assign bugs to the given user."""
-    args = BugzillaCommand.args + [
-        lambda x: x.add_argument('--to', metavar='ASSIGNEE', required=True,
-            help='New assignee'),
-    ]
-
-    def __call__(self):
-        args = self._args
-        message = editor.input('Enter your comment.') if args.message is True \
-            else args.message
-        return map(
-            lambda x: self.bz.bug(x).set_assigned_to(args.to, comment=message),
-            args.bugs
-        )
-
-
 @with_set('given bugs', 'blocked bugs', metavar='BUG', type=int)
 @with_add_remove('given bugs', 'blocked bugs', metavar='BUG', type=int)
 @with_bugs
@@ -446,15 +427,29 @@ class Dump(BugzillaCommand):
 
 
 @with_bugs
+@with_optional_message
 class Edit(BugzillaCommand):
     """Edit the given bugs."""
     args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--assigned-to', metavar='USER',
+            help='new assignee (user matching performed if enabled)'),
+        lambda x: x.add_argument('--status',
+            help='new status'),
+        lambda x: x.add_argument('--resolution',
+            help='new resolution; disallowed when status is open; '
+                 'required when changing from open to closed status'),
+        lambda x: x.add_argument('--dupe-of', type=int, metavar='BUG',
+            help='set this bug as duplicate of the other; ignore status '
+                 'and resolution if supplied'),
         lambda x: x.add_argument('--priority',
             help='new priority'),
         lambda x: x.add_argument('--version',
             help='new version'),
     ]
-    _fields = frozenset(['priority', 'version'])
+    _fields = frozenset([
+        'assigned_to', 'priority', 'version',
+        'status', 'resolution', 'dupe_of',
+    ])
 
     def __call__(self):
         for bug in (self.bz.bug(x) for x in self._args.bugs):
@@ -462,6 +457,8 @@ class Edit(BugzillaCommand):
                 k: getattr(self._args, k)
                 for k in self._fields & self._args.__dict__.viewkeys()
             }
+            kwargs['comment'] = editor.input('Enter your comment.') \
+                if self._args.message is True else self._args.message
             bug.update(**kwargs)
 
 
@@ -643,19 +640,6 @@ class New(BugzillaCommand):
         self._ui.show('Created Bug {}'.format(id))
 
 
-@with_bugs
-class Priority(BugzillaCommand):
-    """Set the priority on the given bugs."""
-    args = BugzillaCommand.args + [
-        lambda x: x.add_argument('--priority', required=True,
-            help='new priority'),
-    ]
-
-    def __call__(self):
-        for bug in (self.bz.bug(x) for x in self._args.bugs):
-            bug.update(priority=self._args.priority)
-
-
 class Products(BugzillaCommand):
     """List the products of a Bugzilla instance."""
     def __call__(self):
@@ -665,101 +649,6 @@ class Products(BugzillaCommand):
             print '{:{}} {}'.format(
                 product['name'] + ':', width, product['description']
             )
-
-
-@with_bugs
-@with_optional_message
-class Status(BugzillaCommand):
-    """Set the status of the given bugs.
-
-    Description
-    -----------
-
-    The ``status`` command is used to update the status and resolution of
-    bugs.  The status is always required unless ``-dupe-of`` is used (see
-    below).  It can be given as the argument to ``--status``, otherwise the
-    user will be prompted to choose the status from a list.
-
-    If the status is changing from one considered "open" to one not
-    considered "open", a resolution is required.  It can be given using
-    ``--resolution``, otherwise the user will be prompted to choose the
-    resolution from a list.
-
-    Marking bugs as duplicates
-    --------------------------
-
-    To set a bug as a duplicate, simply use ``--dupe-of <BUG>``.  ``--status``
-    and ``--resolution`` will be ignored.  Bugzilla will automatically set the
-    status and resolution fields to appropriate values for duplicate bugs.
-    """
-
-    args = BugzillaCommand.args + [
-        lambda x: x.add_argument('--status',
-            help='Specify a resolution (case-insensitive).'),
-        lambda x: x.add_argument('--resolution',
-            help='Specify a resolution (case-insensitive).'),
-        lambda x: x.add_argument('--dupe-of', type=int, metavar='BUG',
-            help='The bug of which the given bugs are duplicates.'),
-    ]
-
-    def __call__(self):
-        args = self._args
-        message = editor.input('Enter your comment.') if args.message is True \
-            else args.message
-
-        if args.dupe_of:
-            # This is all we need; --status and --resolution are ignored
-            return map(
-                lambda x: self.bz.bug(x).set_dupe_of(args.dupe_of, message),
-                args.bugs
-            )
-
-        # get the values of the 'bug_status' field
-        values = self.bz.get_field_values('bug_status')
-
-        if args.status:
-            status = args.status.upper()
-        else:
-            # choose status
-            status = self._ui.choose(
-                'Choose a status',
-                map(lambda x: x['name'], values)
-            )
-
-        # check if the new status is "open"
-        try:
-            value = filter(lambda x: x['name'] == status, values)[0]
-            is_open = value['is_open']
-        except IndexError:
-            # no value matching the chosen status
-            raise UserWarning("Invalid status:", status)
-
-        # instantiate bugs
-        bugs = map(self.bz.bug, args.bugs)
-
-        resolution = None
-        if not is_open:
-            # The new status accepts a resolution.
-            if args.resolution:
-                # A resolution was supplied.
-                resolution = args.resolution.upper()
-            elif any(map(lambda x: x.is_open(), bugs)):
-                # A resolution was not supplied, but one is required since
-                # at least one of the bugs is currently open.  Choose one.
-                values = self.bz.get_field_values('resolution')
-                resolution = self._ui.choose(
-                    'Choose a resolution',
-                    map(lambda x: x['name'], values)
-                )
-
-        return map(
-            lambda x: self.bz.bug(x).set_status(
-                status=status,
-                resolution=resolution,
-                comment=message
-            ),
-            args.bugs
-        )
 
 
 def _make_set_argument(arg):
