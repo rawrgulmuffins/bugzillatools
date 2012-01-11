@@ -7,7 +7,8 @@ bugzillatools-dev :: ???
 New features:
 
 - The new ``edit`` command replaces the ``assign`` and ``status``
-  commands, and also allows editing of priority and version.
+  commands, and also allows editing of priority, version and
+  component.
 
 Other changes:
 

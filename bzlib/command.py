@@ -443,11 +443,14 @@ class Edit(BugzillaCommand):
                  'and resolution if supplied'),
         lambda x: x.add_argument('--priority',
             help='new priority'),
+        lambda x: x.add_argument('--component',
+            help='new component'),
         lambda x: x.add_argument('--version',
             help='new version'),
     ]
     _fields = frozenset([
-        'assigned_to', 'priority', 'version',
+        'assigned_to', 'priority',
+        'component', 'version',
         'status', 'resolution', 'dupe_of',
     ])
 

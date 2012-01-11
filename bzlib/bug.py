@@ -211,7 +211,7 @@ class Bug(object):
             'blocks', 'depends_on',
             'assigned_to', 'cc',
             'comment',
-            'version', 'priority',
+            'component', 'version', 'priority',
         ])
         unknowns = kwargs.viewkeys() - fields
         if unknowns:
