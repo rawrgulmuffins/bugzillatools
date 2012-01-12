@@ -16,6 +16,22 @@ Other changes:
   information.
 
 
+bugzillatools-maint :: ???
+--------------------------
+
+Bug fixes:
+
+- ``search`` command: fix crash when zero bugs returned
+
+
+bugzillatools-0.5.1 :: Tue Jan 10 2012
+--------------------------------------
+
+Bug fixes:
+
+- ``new`` command: fix assigned_to user matching.
+
+
 bugzillatools-0.5 :: Tue Jan 3 2012
 -----------------------------------
 
