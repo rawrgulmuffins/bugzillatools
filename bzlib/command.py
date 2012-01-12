@@ -770,11 +770,11 @@ class Search(BugzillaCommand):
 
         bugs = list(bug.Bug.search(self.bz, **kwargs))
         lens = [len(str(b.bugno)) for b in bugs]
-        width = max(lens) - min(lens) + 2
 
         for _bug in bugs:
             print 'Bug {:{}} {}'.format(
-                str(_bug.bugno) + ':', width, _bug.data['summary']
+                str(_bug.bugno) + ':', max(lens) - min(lens) + 2,
+                _bug.data['summary']
             )
         n = len(bugs)
         print '=> {} bug{} matched criteria'.format(n, 's' if n else '')

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+bugzillatools-maint :: ???
+--------------------------
+
+Bug fixes:
+
+- ``search`` command: fix crash when zero bugs returned
+
+
 bugzillatools-0.5.1 :: Tue Jan 10 2012
 --------------------------------------
 
