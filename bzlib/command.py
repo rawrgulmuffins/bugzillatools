@@ -351,6 +351,8 @@ class Comment(BugzillaCommand):
         lambda x: x.add_argument('--include-empty', action='store_false',
             dest='omit_empty',
             help='Include empty comments.'),
+        lambda x: x.add_argument('--which', type=int, nargs='+', metavar='N',
+            help='show only the given comment numbers'),
     ]
 
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
@@ -364,8 +366,8 @@ class Comment(BugzillaCommand):
         else:
             def cmtfmt(bug):
                 comments = sorted(
-                    enumerate(self.bz.bug(bug).comments),
-                    key=lambda x: int(x[1]['id']),
+                    self.bz.bug(bug).comments,
+                    key=lambda x: int(x['id']),
                     reverse=True  # initially reverse to apply limit
                 )
 
@@ -382,8 +384,9 @@ class Comment(BugzillaCommand):
                         self.formatstring.format(
                             'comment: {}'.format(n) if n else 'description',
                             **comment)
-                        for n, comment in comments
-                        if not args.omit_empty or comment['text']
+                        for n, comment in enumerate(comments)
+                        if not (args.omit_empty and not comment['text']) \
+                            and not (args.which and n not in args.which)
                     )
                 )
             print '\n'.join(map(cmtfmt, args.bugs))
@@ -443,6 +446,26 @@ class Dump(BugzillaCommand):
     def __call__(self):
         bugs = (self.bz.bug(x) for x in self._args.bugs)
         print '\n'.join(str((x.data, x.comments)) for x in bugs)
+
+
+@with_bugs
+class Edit(BugzillaCommand):
+    """Edit the given bugs."""
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--priority',
+            help='new priority'),
+        lambda x: x.add_argument('--version',
+            help='new version'),
+    ]
+    _fields = frozenset(['priority', 'version'])
+
+    def __call__(self):
+        for bug in (self.bz.bug(x) for x in self._args.bugs):
+            kwargs = {
+                k: getattr(self._args, k)
+                for k in self._fields & self._args.__dict__.viewkeys()
+            }
+            bug.update(**kwargs)
 
 
 class Fields(BugzillaCommand):
@@ -623,6 +646,19 @@ class New(BugzillaCommand):
         self._ui.show('Created Bug {}'.format(id))
 
 
+@with_bugs
+class Priority(BugzillaCommand):
+    """Set the priority on the given bugs."""
+    args = BugzillaCommand.args + [
+        lambda x: x.add_argument('--priority', required=True,
+            help='new priority'),
+    ]
+
+    def __call__(self):
+        for bug in (self.bz.bug(x) for x in self._args.bugs):
+            bug.update(priority=self._args.priority)
+
+
 class Products(BugzillaCommand):
     """List the products of a Bugzilla instance."""
     def __call__(self):
@@ -753,7 +789,7 @@ class Search(BugzillaCommand):
             help='Match summary against any of the given substrings.'),
     ]
     simple_arguments = ['summary']
-    set_arguments = 'product', 'component', 'status', 'resolution'
+    set_arguments = 'product', 'component', 'status', 'resolution', 'version'
     for x in set_arguments:
         args.extend(_make_set_argument(x))
 

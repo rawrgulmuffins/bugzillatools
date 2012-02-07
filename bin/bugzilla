@@ -2,6 +2,7 @@
 
 # bugzilla - a command line interface to Bugzilla
 # Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
+# Copyright (C) 2012 Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +43,7 @@ epilog = 'user-defined aliases:\n' + '\n'.join(lines) if lines else None
 _parser = argparse.ArgumentParser(add_help=False)
 
 # add global arguments
-_parser.add_argument('--version', action='version',
+_parser.add_argument('-V', action='version',
     version='%(prog)s {}'.format(bzlib.version))
 
 # parse known args

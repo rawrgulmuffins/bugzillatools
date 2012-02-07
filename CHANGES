@@ -4,9 +4,20 @@ Changelog
 bugzillatools-maint :: ???
 --------------------------
 
+New features:
+
+- ``priority`` command: set the priority of the given bugs
+- ``comment`` command learned the ``--which`` argument, for limiting
+  output to only the given comment(s).
+
 Bug fixes:
 
 - ``search`` command: fix crash when zero bugs returned
+
+Other changes:
+
+- ``-V`` replaces ``--version`` for displaying program version
+  information.
 
 
 bugzillatools-0.5.1 :: Tue Jan 10 2012

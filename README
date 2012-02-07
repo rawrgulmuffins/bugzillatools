@@ -23,12 +23,14 @@ The following subcommands are available:
 :depend:              Show or update dependencies of given bugs.
 :desc:                Show the description of the given bug(s).
 :dump:                Print internal representation of bug data.
+:edit:                Edit the given bugs.
 :fields:              List valid values for bug fields.
 :help:                Show help.
 :history:             Show the history of the given bugs.
 :info:                Show detailed information about the given bugs.
 :list:                Show a one-line summary of the given bugs.
 :new:                 File a new bug.
+:priority:            Set the priority on the given bugs.
 :products:            List the products of a Bugzilla instance.
 :search:              Search for bugs matching given criteria.
 :status:              Set the status of the given bugs.
@@ -59,22 +61,32 @@ commit message, the list of changed files and other details about the commit.
 Installation
 ============
 
-Install via ``pip`` or ``easy_install``::
+::
 
-  pip install bugzillatools
+  # via pip
+  pip install bugzillatools         # as superuser
     -or-
-  easy_install bugzillatools
+  pip install bugzillatools --user  # user site-packages installation
 
-Local install (make sure ``~/.local/bin`` is on your ``PATH``::
+  # via easy_install
+  easy_install bugzillatools        # as superuser
 
-  python setup.py install --user
+  # from source
+  python setup.py install           # as superuser
+    -or-
+  python setup.py install --user    # user site-packages installation
 
-Global install (run as root)::
+The ``bin/`` directory in your user base directory will need to appear
+on the ``PATH`` if installing to user site-packages.  This directory is
+system dependent; see `PEP 370`__.
 
-  python setup.py install
+__ http://www.python.org/dev/peps/pep-0370/
 
-Note that global install or some manual moving of files is
-required for the Bazaar plugin to be detected by Bazaar.
+If installing to user site-packages, some manual moving or symlinking
+of files will be required for the Bazaar plugin to be detected by
+Bazaar.  `PEP 402`__ speaks to this shortcoming.
+
+__ http://www.python.org/dev/peps/pep-0402/
 
 
 Configuration
