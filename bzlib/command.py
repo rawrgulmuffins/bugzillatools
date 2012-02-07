@@ -351,6 +351,8 @@ class Comment(BugzillaCommand):
         lambda x: x.add_argument('--include-empty', action='store_false',
             dest='omit_empty',
             help='Include empty comments.'),
+        lambda x: x.add_argument('--which', type=int, nargs='+', metavar='N',
+            help='show only the given comment numbers'),
     ]
 
     formatstring = '{}\nauthor: {creator}\ntime: {time}\n\n{text}\n\n'
@@ -364,8 +366,8 @@ class Comment(BugzillaCommand):
         else:
             def cmtfmt(bug):
                 comments = sorted(
-                    enumerate(self.bz.bug(bug).comments),
-                    key=lambda x: int(x[1]['id']),
+                    self.bz.bug(bug).comments,
+                    key=lambda x: int(x['id']),
                     reverse=True  # initially reverse to apply limit
                 )
 
@@ -382,8 +384,9 @@ class Comment(BugzillaCommand):
                         self.formatstring.format(
                             'comment: {}'.format(n) if n else 'description',
                             **comment)
-                        for n, comment in comments
-                        if not args.omit_empty or comment['text']
+                        for n, comment in enumerate(comments)
+                        if not (args.omit_empty and not comment['text']) \
+                            and not (args.which and n not in args.which)
                     )
                 )
             print '\n'.join(map(cmtfmt, args.bugs))

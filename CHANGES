@@ -7,7 +7,8 @@ bugzillatools-dev :: ???
 New features:
 
 - ``priority`` command: set the priority of the given bugs
-
+- ``comment`` command learned the ``--which`` argument, for limiting
+  output to only the given comment(s).
 
 Other changes:
 
