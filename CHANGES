@@ -1,14 +1,16 @@
 Changelog
 =========
 
-bugzillatools-maint :: ???
---------------------------
+bugzillatools-0.5.2 :: Tue Feb 7 2012
+-------------------------------------
 
 New features:
 
-- ``priority`` command: set the priority of the given bugs
+- ``priority`` command: set the priority of the given bugs.
 - ``comment`` command learned the ``--which`` argument, for limiting
   output to only the given comment(s).
+- ``search`` learned the ``--version`` argument.
+- ``edit`` command: edit the product version of a bug.
 
 Bug fixes:
 
