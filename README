@@ -134,6 +134,6 @@ Example ``.bugzillarc``
   password = sekrit
 
   [alias]
-  fix = status --status RESOLVED --resolution FIXED
-  wfm = status --status RESOLVED --resolution WORKSFORME
-  confirm = status --status CONFIRMED
+  fix = edit --status RESOLVED --resolution FIXED
+  wfm = edit --status RESOLVED --resolution WORKSFORME
+  confirm = edit --status CONFIRMED
