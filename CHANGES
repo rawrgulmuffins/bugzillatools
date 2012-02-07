@@ -6,22 +6,30 @@ bugzillatools-dev :: ???
 
 New features:
 
-- The new ``edit`` command replaces the ``assign`` and ``status``
-  commands, and also allows editing of priority, version and
+- The new ``edit`` command replaces the ``assign``, ``priority`` and
+  ``status`` commands, and also allows editing of priority, version and
   component.
+
+
+bugzillatools-0.5.2 :: Tue Feb 7 2012
+-------------------------------------
+
+New features:
+
+- ``priority`` command: set the priority of the given bugs.
+- ``comment`` command learned the ``--which`` argument, for limiting
+  output to only the given comment(s).
+- ``search`` learned the ``--version`` argument.
+- ``edit`` command: edit the product version of a bug.
+
+Bug fixes:
+
+- ``search`` command: fix crash when zero bugs returned
 
 Other changes:
 
 - ``-V`` replaces ``--version`` for displaying program version
   information.
-
-
-bugzillatools-maint :: ???
---------------------------
-
-Bug fixes:
-
-- ``search`` command: fix crash when zero bugs returned
 
 
 bugzillatools-0.5.1 :: Tue Jan 10 2012
