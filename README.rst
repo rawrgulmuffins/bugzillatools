@@ -1,6 +1,3 @@
-Bugzilla CLI client and XML-RPC binding and VCS plugins
-=======================================================
-
 Provides a CLI program and Python library for interacting with the
 Bugzilla_ bug tracking system, and plugins for version control
 systems that enable interaction with Bugzilla installations.
@@ -9,8 +6,8 @@ Requires Python_ 2.7 and works with Bugzilla_ 4.0 or later.
 
 The Bazaar_ plugin requires Bazaar 2.0 or later.
 
-``bugzilla``
-------------
+``bugzilla`` program
+--------------------
 
 Command-line application for interacting with Bugzilla servers.
 The following subcommands are available:
