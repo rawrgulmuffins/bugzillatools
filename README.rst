@@ -145,3 +145,29 @@ Example ``.bugzillarc``
   fix = status --status RESOLVED --resolution FIXED
   wfm = status --status RESOLVED --resolution WORKSFORME
   confirm = status --status CONFIRMED
+
+
+License
+=======
+
+bugzillatools is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+
+Contributing
+============
+
+The bugzillatools source code is available from
+https://github.com/frasertweedale/bugzillatools.
+
+Bug reports, patches, feature requests, code review and
+documentation are welcomed.
+
+To submit a patch, please use ``git send-email`` or generate a pull
+request.  Write a `well formed commit message`_.  If your patch is
+nontrivial, update the copyright notice at the top of each changed
+file.
+
+.. _well formed commit message: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
