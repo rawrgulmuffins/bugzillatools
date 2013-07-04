@@ -75,15 +75,11 @@ Installation
 
 The ``bin/`` directory in your user base directory will need to appear
 on the ``PATH`` if installing to user site-packages.  This directory is
-system dependent; see `PEP 370`__.
-
-__ http://www.python.org/dev/peps/pep-0370/
+system dependent; see :pep:`370`.
 
 If installing to user site-packages, some manual moving or symlinking
 of files will be required for the Bazaar plugin to be detected by
-Bazaar.  `PEP 402`__ speaks to this shortcoming.
-
-__ http://www.python.org/dev/peps/pep-0402/
+Bazaar.  :pep:`402` speaks to this shortcoming.
 
 
 Configuration
