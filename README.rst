@@ -1,10 +1,38 @@
-Provides a CLI program and Python library for interacting with the
-Bugzilla_ bug tracking system, and plugins for version control
-systems that enable interaction with Bugzilla installations.
+bugzillatools consists of the ``bugzilla`` CLI program and a Python
+library for interacting with the Bugzilla_ bug tracking system, and
+plugins for version control systems that enable interaction with
+Bugzilla installations.
 
-Requires Python_ 2.7 and works with Bugzilla_ 4.0 or later.
+The only dependency is Python_ 2.7 and bugzillatools works with
+Bugzilla_ 4.0 or later.
 
-The Bazaar_ plugin requires Bazaar 2.0 or later.
+
+Installation
+============
+
+::
+
+  # via pip
+  pip install bugzillatools         # as superuser
+    -or-
+  pip install bugzillatools --user  # user site-packages installation
+
+  # from source
+  python setup.py install           # as superuser
+    -or-
+  python setup.py install --user    # user site-packages installation
+
+The ``bin/`` directory in your user base directory will need to appear
+on the ``PATH`` if installing to user site-packages.  This directory is
+system dependent; see :pep:`370`.
+
+If installing to user site-packages, some manual moving or symlinking
+of files will be required for the Bazaar plugin to be detected by
+Bazaar.  :pep:`402` speaks to this shortcoming.
+
+
+Components
+==========
 
 ``bugzilla`` program
 --------------------
@@ -41,6 +69,7 @@ Library providing access to Bugzilla instances through the XML-RPC
 interface.  Supports bug creation, bug information and comment
 retrieval, updating bug fields and appending comments to bugs.
 
+
 Bazaar_ plugin
 --------------
 
@@ -49,37 +78,13 @@ those trackers when ``bzr commit`` is invoked with the ``--fixes`` argument.
 It also adds a comment to the bug that includes the branch location, the
 commit message, the list of changed files and other details about the commit.
 
+The Bazaar_ plugin requires Bazaar 2.0 or later.
+
 
 .. _Bazaar: http://bazaar.canonical.com/
 .. _Bugzilla: http://www.bugzilla.org/
 .. _Python: http://python.org/
 
-
-Installation
-============
-
-::
-
-  # via pip
-  pip install bugzillatools         # as superuser
-    -or-
-  pip install bugzillatools --user  # user site-packages installation
-
-  # via easy_install
-  easy_install bugzillatools        # as superuser
-
-  # from source
-  python setup.py install           # as superuser
-    -or-
-  python setup.py install --user    # user site-packages installation
-
-The ``bin/`` directory in your user base directory will need to appear
-on the ``PATH`` if installing to user site-packages.  This directory is
-system dependent; see :pep:`370`.
-
-If installing to user site-packages, some manual moving or symlinking
-of files will be required for the Bazaar plugin to be detected by
-Bazaar.  :pep:`402` speaks to this shortcoming.
 
 
 Configuration
