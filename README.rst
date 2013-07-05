@@ -4,7 +4,10 @@ plugins for version control systems that enable interaction with
 Bugzilla installations.
 
 The only dependency is Python_ 2.7 and bugzillatools works with
-Bugzilla_ 4.0 or later.
+Bugzilla_ 4.0 or later where the XML-RPC feature is enabled.
+
+.. _Bugzilla: http://www.bugzilla.org/
+.. _Python: http://python.org/
 
 
 Installation
@@ -80,32 +83,31 @@ commit message, the list of changed files and other details about the commit.
 
 The Bazaar_ plugin requires Bazaar 2.0 or later.
 
-
 .. _Bazaar: http://bazaar.canonical.com/
-.. _Bugzilla: http://www.bugzilla.org/
-.. _Python: http://python.org/
-
 
 
 Configuration
 =============
 
-A configuration file is looked for at ``~/.bugzillarc``.  Its format is
-INI-like; the following configuration objects are understood:
+``.bugzillarc``
+---------------
+
+The ``bugzilla`` program looks for its configuration in
+``~/.bugzillarc``, which uses ini-style configuration.
 
 ``core``
---------
+^^^^^^^^
 
 ``server``
   Name of the default server
 
 ``alias``
----------
+^^^^^^^^^
 
 Option names are aliases; their values are the replacement.
 
 ``server.<name>``
------------------
+^^^^^^^^^^^^^^^^^
 
 Define a server.  bugzillatools supports multiple servers; the
 ``--server=<name>`` argument can be used to select a server.
@@ -129,7 +131,7 @@ Define a server.  bugzillatools supports multiple servers; the
 
 
 Example ``.bugzillarc``
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -145,6 +147,27 @@ Example ``.bugzillarc``
   fix = status --status RESOLVED --resolution FIXED
   wfm = status --status RESOLVED --resolution WORKSFORME
   confirm = status --status CONFIRMED
+
+
+Bazaar plugin
+-------------
+
+To enable the Bazaar bugzillatools plugin, include following
+configuration directives in either ``~/.bazaar/bazaar.conf`` (global
+configuration) or ``.bzr/branch/branch.conf`` (within a branch)::
+
+  bugzilla_<server>_bugzillatools_enable = True
+  bugzilla_<server>_url = <bugzilla url>
+  bugzilla_<server>_status = RESOLVED
+  bugzilla_<server>_resolution = FIXED
+
+Such a configuration assumes that a section ``[server.<server>]``
+has been defined in your ``.bugzillarc``.
+
+You can now set the status of bugs (using the status and resolution
+defined in the Bazaar config) directly::
+
+  bzr commit -m 'fix bug 123' --fixes <server>:123
 
 
 License
