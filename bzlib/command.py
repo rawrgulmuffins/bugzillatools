@@ -1,6 +1,6 @@
 # This file is part of bugzillatools
+# Copyright (C) 2011, 2012, 2013 Fraser Tweedale
 # Copyright (C) 2011, 2012 Benon Technologies Pty Ltd
-# Copyright (C) 2011, 2012 Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -475,21 +475,23 @@ class Fields(BugzillaCommand):
         args = self._args
         fields = filter(lambda x: 'values' in x, self.bz.get_fields())
         for field in fields:
-            keyfn = lambda x: x['visibility_values']
+            keyfn = lambda x: x.get('visibility_values')
             groups = itertools.groupby(
                 sorted(field['values'], None, keyfn),
                 keyfn
             )
             print field['name'], ':'
             for key, group in groups:
-                values = sorted(group, None, lambda x: int(x['sortkey']))
+                keyfn = lambda x: int(x.get('sortkey', -1))
+                values = sorted(group, None, keyfn)
                 if key:
                     print '  {}: {}'.format(
-                        key,
+                        ','.join(key),
                         ','.join(map(lambda x: x['name'], values))
                     )
                 else:
-                    print '  ', ','.join(map(lambda x: x['name'], values))
+                    value_names = (v.get('name') for v in values)
+                    print '  ', ','.join(s for s in value_names if s)
 
 
 def _format_history(history):
