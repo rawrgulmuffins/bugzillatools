@@ -1,5 +1,6 @@
 # This file is part of bugzillatools
-# Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
+# Copyright (C) 2011, 2013  Fraser Tweedale
+# Copyright (C) 2011  Benon Technologies Pty Ltd
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,18 +26,21 @@ class EmptyInputError(Exception):
 
 
 def input(message, remove_comments=True):
-    """Invoke $EDITOR for message input.
+    """Invoke ``$EDITOR`` for message input.
 
-    Invoke $EDITOR or /bin/vi on a temporary file for user input.
+    Invoke ``$EDITOR`` or vi(1) on a temporary file for user input.
 
-    message: A message describing what the user is inputting. Should be
-             terminated with a full stop.
-    remove_comments: Remove lines starting with '#' from the data.
+    ``message``
+        A message describing what the user is inputting. Should be
+        terminated with a full stop.
+    ``remove_comments``
+        Remove lines starting with '#' from the data.
+
     """
     try:
-        editor = os.environ['EDITOR']
+        editor = [os.environ['EDITOR']]
     except KeyError:
-        editor = '/bin/vi'
+        editor = ['/usr/bin/env', 'vi']
 
     # build initial text
     text = [message]
@@ -50,7 +54,7 @@ def input(message, remove_comments=True):
     with tempfile.NamedTemporaryFile() as fh:
         fh.writelines(lines)
         fh.flush()
-        returncode = subprocess.call([editor, fh.name])
+        returncode = subprocess.call(editor + [fh.name])
         if returncode:
             raise IOError('Editor did not exit cleanly')
         fh.seek(0)
