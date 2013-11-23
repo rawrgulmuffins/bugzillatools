@@ -1,6 +1,6 @@
 # This file is part of bugzillatools
+# Copyright (C) 2011, 2012, 2013  Fraser Tweedale
 # Copyright (C) 2011, 2012 Benon Technologies Pty Ltd
-# Copyright (C) 2011, 2012 Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ class Bug(object):
         """
         fields = frozenset([
             'alias', 'assigned_to', 'component', 'creation_time', 'creator',
-            'id', 'last_change_time', 'op_sys', 'platform', 'priority',
+            'id', 'last_change_time', 'op_sys', 'rep_platform', 'priority',
             'product', 'resolution', 'severity', 'status', 'summary',
             'target_milestone', 'qa_contact', 'url', 'version', 'whiteboard',
             'limit', 'offset',

@@ -601,7 +601,7 @@ class New(BugzillaCommand):
         # (this info is not introspectable as of Bugzilla 4.0)
         create_fields = [
             'product', 'component', 'summary', 'version', 'comment',
-            'op_sys', 'platform', 'priority', 'severity', 'alias',
+            'op_sys', 'rep_platform', 'priority', 'severity', 'alias',
             'assigned_to', 'cc', 'comment_is_private', 'groups',
             'qa_contact', 'status', 'target_milestone',
         ]

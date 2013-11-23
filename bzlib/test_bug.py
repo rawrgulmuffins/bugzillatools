@@ -1,4 +1,5 @@
 # This file is part of bugzillatools
+# Copyright (C) 2013 Fraser Tweedale
 # Copyright (C) 2011 Benon Technologies Pty Ltd
 #
 # bugzillatools is free software: you can redistribute it and/or modify
@@ -32,7 +33,7 @@ class BugTestCase(unittest.TestCase):
             bug.Bug.search(self.bz, not_foobar='baz')
         fields = frozenset([
             'alias', 'assigned_to', 'component', 'creation_time', 'creator',
-            'id', 'last_change_time', 'op_sys', 'platform', 'priority',
+            'id', 'last_change_time', 'op_sys', 'rep_platform', 'priority',
             'product', 'resolution', 'severity', 'status', 'summary',
             'target_milestone', 'qa_contact', 'url', 'version', 'whiteboard',
             'limit', 'offset',
