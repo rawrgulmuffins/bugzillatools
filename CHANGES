@@ -1,8 +1,26 @@
 Changelog
 =========
 
-bugzillatools-0.5.2 :: Tue Feb 7 2012
--------------------------------------
+v0.5.3 :: Sat Nov 23 2013
+-------------------------
+
+Bug fixes:
+
+- editor: fix incorrect path to vi(1) when EDITOR is not defined
+  (issues/1; reported by @taa1)
+- ``create`` command: treat "defaulted" fields as mandatory in case
+  no default is set (issues/2; reported by @taa1)
+- ui: fix some unicode encoding errors
+- ``fields`` command: handle minor changes in result format in 4.4
+- correct the name of the platform field (platform -> rep_platform)
+
+Other changes:
+
+- expand bzr plugin documentation
+
+
+v0.5.2 :: Tue Feb 7 2012
+------------------------
 
 New features:
 
@@ -22,16 +40,16 @@ Other changes:
   information.
 
 
-bugzillatools-0.5.1 :: Tue Jan 10 2012
---------------------------------------
+v0.5.1 :: Tue Jan 10 2012
+-------------------------
 
 Bug fixes:
 
 - ``new`` command: fix assigned_to user matching.
 
 
-bugzillatools-0.5 :: Tue Jan 3 2012
------------------------------------
+v0.5 :: Tue Jan 3 2012
+----------------------
 
 New features:
 
@@ -48,8 +66,8 @@ Bug fixes:
 - ``time`` command: calculate the hours worked on a bug.
 
 
-bugzillatools-0.4 :: Wed Nov 30 2011
-------------------------------------
+v0.4 :: Wed Nov 30 2011
+-----------------------
 
 New features:
 
@@ -76,8 +94,8 @@ Other changes:
   ``ConfigParser``).  JSON configuration is no longer supported.
 
 
-bugzillatools-0.3 :: Sun Aug 7 2011
------------------------------------
+v0.3 :: Sun Aug 7 2011
+----------------------
 
 New features:
 
@@ -102,8 +120,8 @@ Bug fixes:
   contains only one item.
 
 
-bugzillatools-0.2.1 :: Tue Jul 12 2011
---------------------------------------
+v0.2.1 :: Tue Jul 12 2011
+-------------------------
 
 Bug fixes:
 
@@ -112,8 +130,8 @@ Bug fixes:
 - Add global arguments to subcommand ``--help`` output.
 
 
-bugzillatools-0.2 :: Sat Jul 2 2011
------------------------------------
+v0.2 :: Sat Jul 2 2011
+----------------------
 
 New features:
 
@@ -149,16 +167,16 @@ Other changes:
   (formerly ~/.bugrc).
 
 
-bugzillatools-0.1.2 :: Fri Jun 17 2011
---------------------------------------
+v0.1.2 :: Fri Jun 17 2011
+-------------------------
 
 Bug fixes:
 
 - Fix Bugzilla construction args
 
 
-bugzillatools-0.1.1 :: Tue Jun 14 2011
---------------------------------------
+v0.1.1 :: Tue Jun 14 2011
+-------------------------
 
 New features:
 
@@ -170,8 +188,8 @@ Bug fixes:
 - Handle server lookup failure when no servers are defined.
 
 
-bugzillatools-0.1 :: Sun Jun 12 2011
-------------------------------------
+v0.1 :: Sun Jun 12 2011
+-----------------------
 
 New features:
 
