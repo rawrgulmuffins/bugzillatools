@@ -560,7 +560,11 @@ class New(BugzillaCommand):
 
         # get mandatory fields
         fields = self.bz.get_fields()
-        mandatory_fields = filter(lambda x: x['is_mandatory'], fields)
+        defaulted_fields = [
+            'description', 'op_sys', 'rep_platform', 'priority', 'severity']
+        mandatory_fields = filter(
+            lambda x: x['is_mandatory'] or x['name'] in defaulted_fields,
+            fields)
 
         # first choose the product
         products = [x['name'] for x in self.bz.get_products()]
