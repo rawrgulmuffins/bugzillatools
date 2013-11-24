@@ -15,11 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-version_info = (0, 5, 3, 'final', 0)
+version_info = (0, 5, 3, 'final', 1)
 
 version_fmt = '{0}.{1}'
 if version_info[2]:
     version_fmt += '.{2}'
 if version_info[3] != 'final':
     version_fmt += '{3}{4}'
+elif version_info[4]:
+    version_fmt += '.{4}'
 version = version_fmt.format(*version_info)

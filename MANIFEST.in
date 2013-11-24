@@ -1,3 +1,4 @@
 include MANIFEST.in
+include README.rst
 include gpl-3.0.txt
 include CHANGES
