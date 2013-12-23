@@ -74,9 +74,13 @@ class Bugzilla(object):
                     "No configuration for server '{}'."
                     .format(kwargs['server'])
                 )
+        mandatory_kwargs = ('url', 'user', 'password')
         _server.update(
-            {k: kwargs[k] for k in ('url', 'user', 'password') if kwargs[k]}
+            {k: kwargs[k] for k in mandatory_kwargs if kwargs[k]}
         )
+        if mandatory_kwargs - _server.viewkeys():
+            missing_args = ', '.join(mandatory_kwargs - _server.viewkeys())
+            raise UserWarning("missing args: {}".format(missing_args))
         return cls(**_server)
 
     def __init__(self, url=None, user=None, password=None, **config):
