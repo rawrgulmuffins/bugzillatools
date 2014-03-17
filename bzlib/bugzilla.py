@@ -164,7 +164,7 @@ class Bugzilla(object):
             effect.  If not supplied, no effect.
         """
         field = filter(lambda x: x['name'] == name, self.get_fields())[0]
-        values = field['values']
+        values = [value for value in field['values'] if 'name' in value]
         if omit_empty:
             values = filter(lambda x: x['name'], values)
         value_field = field.get('value_field')
