@@ -1,6 +1,16 @@
 Changelog
 =========
 
+v0.5.4 :: Sun Nov 23 2014
+-------------------------
+
+Bug fixes:
+
+- better error messages on missing server/account configuration (#3)
+- remove fields without name data from bug records (#5)
+- make user and password configuration optional (#12)
+
+
 v0.5.3.1 :: Sun Nov 24 2013
 ---------------------------
 
