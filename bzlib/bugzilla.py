@@ -1,5 +1,6 @@
 # This file is part of bugzillatools
 # Copyright (C) 2011 Benon Technologies Pty Ltd, Fraser Tweedale
+# Copyright (C) 2014 Fraser Tweedale
 #
 # bugzillatools is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,13 +75,16 @@ class Bugzilla(object):
                     "No configuration for server '{}'."
                     .format(kwargs['server'])
                 )
-        mandatory_kwargs = ('url', 'user', 'password')
-        _server.update(
-            {k: kwargs[k] for k in mandatory_kwargs if kwargs[k]}
-        )
+
+        for k in {'url', 'user', 'password'}:
+            if k in kwargs and kwargs[k]:
+                _server[k] = kwargs[k]
+
+        mandatory_kwargs = {'url'}
         if mandatory_kwargs - _server.viewkeys():
             missing_args = ', '.join(mandatory_kwargs - _server.viewkeys())
             raise UserWarning("missing args: {}".format(missing_args))
+
         return cls(**_server)
 
     def __init__(self, url=None, user=None, password=None, **config):
@@ -113,7 +117,11 @@ class Bugzilla(object):
             )
         url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
         # httplib explodes if url is unicode
-        self.server = xmlrpclib.ServerProxy(str(url), use_datetime=True)
+        self.server = xmlrpclib.ServerProxy(
+            str(url),
+            use_datetime=True,
+            allow_none=True
+        )
 
     def rpc(self, *args, **kwargs):
         """Do an RPC on the Bugzilla server.

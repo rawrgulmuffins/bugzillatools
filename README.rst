@@ -113,11 +113,11 @@ Define a server.  bugzillatools supports multiple servers; the
 ``--server=<name>`` argument can be used to select a server.
 
 ``url``
-  Base URL of the Bugzilla server.
+  Base URL of the Bugzilla server (mandatory)
 ``user``
-  Bugzilla username.
+  Bugzilla username (optional)
 ``password``
-  Bugzilla password
+  Bugzilla password (optional)
 ``assign_status``
   When the ``assign`` command is used, if the current status of a bug
   is in the first list, the status will be updated to the second item.
