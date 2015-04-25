@@ -371,17 +371,13 @@ class Comment(BugzillaCommand):
         else:
             def cmtfmt(bug):
                 comments = sorted(
-                    self.bz.bug(bug).comments,
-                    key=lambda x: int(x['id']),
-                    reverse=True  # initially reverse to apply limit
+                    enumerate(self.bz.bug(bug).comments),
+                    key=lambda x: int(x[1]['id'])
                 )
-
-                # apply limit, if one given
-                comments = comments[:abs(args.limit)] \
-                    if args.limit else comments
-
-                # re-reverse if reversed comments were /not/ wanted
-                comments = reversed(comments) if not args.reverse else comments
+                if args.reverse:
+                    comments = list(reversed(comments))
+                if args.limit:
+                    comments = comments[:abs(args.limit)]
 
                 return '=====\nBUG {}\n\n-----\n{}'.format(
                     bug,
@@ -389,8 +385,8 @@ class Comment(BugzillaCommand):
                         self.formatstring.format(
                             'comment: {}'.format(n) if n else 'description',
                             **comment)
-                        for n, comment in enumerate(comments)
-                        if not (args.omit_empty and not comment['text']) \
+                        for n, comment in comments
+                        if not (args.omit_empty and not comment['text'])
                             and not (args.which and n not in args.which)
                     )
                 )
