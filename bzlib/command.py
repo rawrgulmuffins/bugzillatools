@@ -352,6 +352,10 @@ class Comment(BugzillaCommand):
         lambda x: x.add_argument('--include-empty', action='store_false',
             dest='omit_empty',
             help='Include empty comments.'),
+        lambda x: x.add_argument('--private', action='store_true',
+            default=False,
+            dest='is_private',
+            help='Make comment private.'),
         lambda x: x.add_argument('--which', type=int, nargs='+', metavar='N',
             help='show only the given comment numbers'),
     ]
@@ -363,7 +367,7 @@ class Comment(BugzillaCommand):
         message = editor.input('Enter your comment.') \
             if args.message is True else args.message
         if message:
-            map(lambda x: self.bz.bug(x).add_comment(message), args.bugs)
+            map(lambda x: self.bz.bug(x).add_comment(message, args.is_private), args.bugs)
         else:
             def cmtfmt(bug):
                 comments = sorted(

@@ -166,8 +166,8 @@ class Bug(object):
         self.bugno = result['id']
         return self.bugno
 
-    def add_comment(self, comment):
-        self.rpc('add_comment', id=self.bugno, comment=comment)
+    def add_comment(self, comment, is_private=False):
+        self.rpc('add_comment', id=self.bugno, comment=comment, is_private=is_private)
         self.comments = None  # comments are stale
         self.history = None  # history is stale
 
