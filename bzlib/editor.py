@@ -43,13 +43,13 @@ def input(message, remove_comments=True):
         editor = ['/usr/bin/env', 'vi']
 
     # build initial text
-    text = [message]
+    text = [message.encode('utf-8')]
     if remove_comments:
         text.append("Lines starting with '#' will be ignored.")
     text.append('An empty message aborts the operation.')
 
     lines = ['\n']  # start with a single empty line
-    lines += map(lambda x: '# ' + x + '\n', textwrap.wrap(' '.join(text)))
+    lines += map('# {}\n'.format, textwrap.wrap(' '.join(text)))
 
     with tempfile.NamedTemporaryFile() as fh:
         fh.writelines(lines)
