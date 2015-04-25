@@ -1,6 +1,21 @@
 Changelog
 =========
 
+v0.5.5 :: Sat Apr 25 2015
+-------------------------
+
+New features:
+
+- ``comment`` command learned the ``--private`` option
+  (contributed by Johannes Segitz)
+
+Bug fixes:
+
+- fix comment enumeration order
+- fix string encoding error when invoking editor which could lead to invalid
+  XML being sent to server
+
+
 v0.5.4 :: Sun Nov 23 2014
 -------------------------
 
