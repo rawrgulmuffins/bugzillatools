@@ -101,7 +101,7 @@ class Bug(object):
                 kwargs[_in] = list(all_values - frozenset(kwargs[_not_in]))
             del kwargs[_not_in]  # delete the _not_in
 
-        unknowns = kwargs.viewkeys() - fields
+        unknowns = kwargs.keys() - fields
         if unknowns:
             # unknown arguments
             raise TypeError(
@@ -252,14 +252,13 @@ class Bug(object):
             'comment',
             'version', 'priority',
         ])
-        unknowns = kwargs.viewkeys() - fields
+        unknowns = kwargs.keys() - fields
         if unknowns:
             # unknown arguments
             raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
 
         # filter out ``None``s
-        kwargs = {k: v for k, v in kwargs.viewitems() if v is not None}
-
+        kwargs = {k: v for k, v in kwargs.keys() if v is not None}
         # format deadline (YYYY-MM-DD)
         if 'deadline' in kwargs:
             date = kwargs['deadline']
