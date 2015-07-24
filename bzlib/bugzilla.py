@@ -18,7 +18,7 @@
 try:
     import urllib.parse as urlparse
 except ImportError:
-    from urlparse import urlparse
+    import urlparse
 try:
     import xmlrpclib
 except ImportError:
@@ -87,7 +87,7 @@ class Bugzilla(object):
                 _server[k] = kwargs[k]
 
         mandatory_kwargs = {'url'}
-        if mandatory_kwargs - _server.keys():
+        if mandatory_kwargs - set(_server.keys()):
             missing_args = ', '.join(mandatory_kwargs - _server.items())
             raise UserWarning("missing args: {}".format(missing_args))
 

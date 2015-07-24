@@ -101,7 +101,7 @@ class Bug(object):
                 kwargs[_in] = list(all_values - frozenset(kwargs[_not_in]))
             del kwargs[_not_in]  # delete the _not_in
 
-        unknowns = kwargs.keys() - fields
+        unknowns = set(kwargs.keys()) - fields
         if unknowns:
             # unknown arguments
             raise TypeError(
