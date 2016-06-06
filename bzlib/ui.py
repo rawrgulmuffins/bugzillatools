@@ -168,7 +168,7 @@ def filter_user(string, bugzilla=None, default=None):
 
 class UI(object):
     def show(self, msg):
-        print msg
+        print(msg)
 
     def bail(self, msg=None):
         """Exit uncleanly with an optional message"""

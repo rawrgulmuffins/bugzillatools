@@ -41,7 +41,7 @@ class URLTestCase(unittest.TestCase):
         with self.assertRaises(bugzilla.URLError) as cm:
             bugzilla.Bugzilla('bogus://bugzilla.example.com/', 'u', 'p')
         self.assertEqual(
-            cm.exception.message,
+            str(cm.exception),
             "URL scheme 'bogus' not supported."
         )
 
@@ -54,7 +54,7 @@ class URLTestCase(unittest.TestCase):
             with self.assertRaises(bugzilla.URLError) as cm:
                 bugzilla.Bugzilla(url, 'u', 'p')
             self.assertEqual(
-                cm.exception.message,
+                str(cm.exception),
                 'URL {!r} is not valid.'.format(url)
             )
 
@@ -63,21 +63,21 @@ class URLTestCase(unittest.TestCase):
         with self.assertRaises(bugzilla.URLError) as cm:
             bugzilla.Bugzilla('http://bugzilla.example.com/;p', 'u', 'p')
         self.assertEqual(
-            cm.exception.message,
+            str(cm.exception),
             'URL params, queries and fragments not supported.'
         )
         # query
         with self.assertRaises(bugzilla.URLError) as cm:
             bugzilla.Bugzilla('http://bugzilla.example.com/?q', 'u', 'p')
         self.assertEqual(
-            cm.exception.message,
+            str(cm.exception),
             'URL params, queries and fragments not supported.'
         )
         # fragment
         with self.assertRaises(bugzilla.URLError) as cm:
             bugzilla.Bugzilla('http://bugzilla.example.com/#f', 'u', 'p')
         self.assertEqual(
-            cm.exception.message,
+            str(cm.exception),
             'URL params, queries and fragments not supported.'
         )
 

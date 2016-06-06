@@ -15,8 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import urlparse
-import xmlrpclib
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
 
 from . import bug
 from . import config
@@ -58,7 +64,7 @@ class Bugzilla(object):
         required, but may be ``None``.
         """
         mandatory_args = set(['server', 'url', 'user', 'password'])
-        mandatory_args -= kwargs.viewkeys()
+        mandatory_args -= set(kwargs.keys())
         if mandatory_args:
             raise TypeError('Mandatory args ({}) not supplied'.format(
                 ', '.join("'{}'".format(arg) for arg in mandatory_args)))
@@ -81,8 +87,8 @@ class Bugzilla(object):
                 _server[k] = kwargs[k]
 
         mandatory_kwargs = {'url'}
-        if mandatory_kwargs - _server.viewkeys():
-            missing_args = ', '.join(mandatory_kwargs - _server.viewkeys())
+        if mandatory_kwargs - set(_server.keys()):
+            missing_args = ', '.join(mandatory_kwargs - _server.items())
             raise UserWarning("missing args: {}".format(missing_args))
 
         return cls(**_server)
