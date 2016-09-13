@@ -245,20 +245,8 @@ class Bug(object):
         A wrapper for the RPC ``bug.update`` method that performs some sanity
         checks and flushes cached data as necessary.
         """
-        fields = frozenset([
-            'remaining_time', 'work_time', 'estimated_time', 'deadline',
-            'blocks', 'depends_on',
-            'cc',
-            'comment',
-            'version', 'priority',
-        ])
-        unknowns = kwargs.keys() - fields
-        if unknowns:
-            # unknown arguments
-            raise TypeError('Invalid keyword arguments: {}.'.format(unknowns))
-
         # filter out ``None``s
-        kwargs = {k: v for k, v in kwargs.keys() if v is not None}
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
         # format deadline (YYYY-MM-DD)
         if 'deadline' in kwargs:
             date = kwargs['deadline']
