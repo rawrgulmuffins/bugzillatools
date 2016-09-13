@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-version_info = (0, 5, 5, 'final', 0)
+version_info = (0, 6, 0, 'final', 0)
 
 version_fmt = '{0}.{1}'
 if version_info[2]:

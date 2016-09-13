@@ -2,3 +2,4 @@ MANIFEST
 *.pyc
 /build/
 /dist/
+*.egg-info
