@@ -8,4 +8,4 @@ python:
 # NOTE: When we break out the unit tests from the actual python modules this is
 #       going to break this script statement.
 script:
-    - pip install . && pip install -r tests_require && python -m py.test bzlib
+    - pip install . && pip install -r tests_require && python -m pytest bzlib
