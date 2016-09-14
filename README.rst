@@ -3,7 +3,7 @@ library for interacting with the Bugzilla_ bug tracking system, and
 plugins for version control systems that enable interaction with
 Bugzilla installations.
 
-The only dependency is Python_ 2.7 and bugzillatools works with
+The only dependency is Python_ 2.7 to Pyhton_ 3.5 and bugzillatools works with
 Bugzilla_ 4.0 or later where the XML-RPC feature is enabled.
 
 .. _Bugzilla: http://www.bugzilla.org/
@@ -84,6 +84,68 @@ commit message, the list of changed files and other details about the commit.
 The Bazaar_ plugin requires Bazaar 2.0 or later.
 
 .. _Bazaar: http://bazaar.canonical.com/
+
+``bzlib Library Usage Examples``
+================================
+
+The first step is to create a Bugzilla object that represents the Bugzilla
+server you're working with
+
+.. code:: python
+    from bzlib.bugzilla import Bugzilla
+
+    URL = "http://example.bugzilla.com"
+    USERNAME = "my_username"
+    password = "my_password"
+    bz = Bugzilla(url=URL, username=USERNAME, password=PASSWORD)
+
+Create a new bug
+
+.. code:: python
+    from bzlib.bug import Bug
+    bz = ...  # From above
+    bug = Bug(bz=bz)
+    bug.data = {
+        "product": "my_product",
+        "component": "my_component",
+        "summary": "my_summary",
+        "version": "my_version",
+    }
+
+    # Send RPC call to the bugzilla server.
+    bug.create()
+
+Modify an existing bug
+
+.. code:: python
+    from bzlib.bug import Bug
+    bz = ...  # From above
+    BUG_ID = 1337
+    bug = Bug(bz=bz, bugno_or_data=BUG_ID)
+    # Modify the bug
+    bug.update(whiteboard="I'm working on it, don't worry!")
+
+    # Bug attributes are loaded lazily, so we won't get any attributes until we try
+    # to access them
+    bug.data  # Access the attributes
+
+If your update has succeeded your result should have a non-empty "changes"
+subsection
+
+.. code:: python
+    {'bugs': [{'alias': '',
+    'changes': {'whiteboard': {'added': 'The dreaded wontfix',
+        'removed': 'Sure, we'll fix it'}},
+    'id': 167866,
+    'last_change_time': datetime.datetime(2016, 9, 13, 23, 12, 7)}]}
+
+If nothing was changed then you'll see
+
+.. code:: python
+    {'bugs': [{'alias': '',
+    'changes': {},
+    'id': 167866,
+    'last_change_time': datetime.datetime(2016, 9, 13, 23, 12, 7)}]}
 
 
 Configuration
@@ -182,8 +244,16 @@ the Free Software Foundation, either version 3 of the License, or
 Contributing
 ============
 
-The bugzillatools source code is available from
+The bugzillatools source code is available at
+https://github.com/rawrgulmuffins/bugzillatools.
+
+The bugzillatools source code was available from
 https://github.com/frasertweedale/bugzillatools.
+
+Fraser Tweedale is the original author and maintainer for Bugzillatools.
+
+Current maintainers are Brooks Kindle (brookskindle at gmail.com) and
+Alex LordThorsen (AlexLordThorsen at gmail.com)
 
 Bug reports, patches, feature requests, code review and
 documentation are welcomed.
