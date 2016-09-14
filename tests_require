@@ -1,0 +1,3 @@
+pytest
+pylint
+# TODO: add a specific versions to dependencies
