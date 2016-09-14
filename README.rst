@@ -92,6 +92,7 @@ The first step is to create a Bugzilla object that represents the Bugzilla
 server you're working with
 
 .. code:: python
+
     from bzlib.bugzilla import Bugzilla
 
     URL = "http://example.bugzilla.com"
@@ -102,6 +103,7 @@ server you're working with
 Create a new bug
 
 .. code:: python
+
     from bzlib.bug import Bug
     bz = ...  # From above
     bug = Bug(bz=bz)
@@ -118,6 +120,7 @@ Create a new bug
 Modify an existing bug
 
 .. code:: python
+
     from bzlib.bug import Bug
     bz = ...  # From above
     BUG_ID = 1337
@@ -133,6 +136,7 @@ If your update has succeeded your result should have a non-empty "changes"
 subsection
 
 .. code:: python
+
     {'bugs': [{'alias': '',
     'changes': {'whiteboard': {'added': 'The dreaded wontfix',
         'removed': 'Sure, we'll fix it'}},
@@ -142,6 +146,7 @@ subsection
 If nothing was changed then you'll see
 
 .. code:: python
+
     {'bugs': [{'alias': '',
     'changes': {},
     'id': 167866,
