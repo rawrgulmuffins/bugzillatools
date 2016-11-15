@@ -133,12 +133,17 @@ class Bugzilla(object):
                 'URL params, queries and fragments not supported.'
             )
         url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
+        transport = None
+        if cookiefile and parsed_url.scheme == "https":
+            transport = SafeCookiesTransport(cookiefile)
+        elif cookiefile:
+            transport = CookiesTransport(cookiefile)
         # httplib explodes if url is unicode
         self.server = xmlrpclib.ServerProxy(
             str(url),
             use_datetime=True,
             allow_none=True,
-            transport=CookiesTransport(cookiefile) if cookiefile else None,
+            transport=transport,
         )
 
     def rpc(self, *args, **kwargs):
@@ -231,8 +236,8 @@ class Bugzilla(object):
         return users[0]
 
 
-class CookiesTransport(xmlrpclib.Transport):
-    """A Transport subclass that retains cookies over its lifetime and has the
+class AbstractCookiesTransport:
+    """An Transport subclass that retains cookies over its lifetime and has the
     ability to store/load cookies in a file.
 
     Taken from http://stackoverflow.com/a/25876504 and modified to implement
@@ -271,3 +276,17 @@ class CookiesTransport(xmlrpclib.Transport):
             self.cookies.load(cookie)  # Add or replace cookie
         self.save_cookies()
         return super().parse_response(response)
+
+
+class CookiesTransport(AbstractCookiesTransport, xmlrpclib.Transport):
+    """Concrete implementation of an AbstractCookiesTransport that handles HTTP
+    transactions to an XML-RPC server.
+    """
+    pass
+
+
+class SafeCookiesTransport(AbstractCookiesTransport, xmlrpclib.SafeTransport):
+    """Concrete implementation of an AbstractCookiesTransport that handles
+    HTTPS transactions to an XML-RPC server.
+    """
+    pass
