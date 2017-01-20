@@ -259,7 +259,7 @@ class AbstractCookiesTransport:
     def save_cookies(self, cookiefile=None):
         cookiefile = cookiefile or self.cookiefile
         with open(cookiefile, 'w') as fd:
-            fd.write(self.cookies.output(sep="\n"))
+            fd.write(self.cookies.output(header="", sep="\n"))
 
     def send_headers(self, connection, headers):
         if self.cookies:
