@@ -135,18 +135,28 @@ class Bugzilla(object):
                 'URL params, queries and fragments not supported.'
             )
         url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
-        transport = None
+
+        handler = xmlrpclib.Transport
+        extra_kwargs = {"use_datetime": True}
         if cookiefile and parsed_url.scheme == "https":
-            transport = SafeCookiesTransport(cookiefile, context=context)
-        elif cookiefile:
-            transport = CookiesTransport(cookiefile)
+            handler = SafeCookiesTransport
+            extra_kwargs["cookiefile"] = cookiefile
+            extra_kwargs["context"] = context
+        elif cookiefile:  # Non-https, but a cookie file was specified
+            handler = CookiesTransport
+            extra_kwargs["cookiefile"] = cookiefile
+        elif parsed_url.scheme == "https":  # Https, but no cookiefile
+            handler = xmlrpclib.SafeTransport
+            extra_kwargs["context"] = context
+        else:  # Non-https and no cookiefile
+            handler = xmlrpclib.Transport
+        transport = handler(**extra_kwargs)
+
         # httplib explodes if url is unicode
         self.server = xmlrpclib.ServerProxy(
             str(url),
-            use_datetime=True,
             allow_none=True,
             transport=transport,
-            context=context,
         )
 
     def rpc(self, *args, **kwargs):
