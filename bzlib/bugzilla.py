@@ -102,15 +102,17 @@ class Bugzilla(object):
         return cls(**_server)
 
     def __init__(self, url=None, user=None, password=None,
-                 cookiefile=None, **config):
+                 cookiefile=None, context=None, **config):
         """Create a Bugzilla XML-RPC client.
 
         url         : points to a bugzilla instance (base URL; must end in '/')
         user        : bugzilla username
         password    : bugzilla password
         cookiefile  : filename to optionally store and retrieve cookies from
+        context     : an ssl.SSLContext object used to configure the SSL
+                      settings of the underlying connection. Only applicable to
+                      HTTPS urls.
         """
-
         self._products = None
         self._fields = None
         self._user_cache = {}
@@ -133,15 +135,26 @@ class Bugzilla(object):
                 'URL params, queries and fragments not supported.'
             )
         url = url + 'xmlrpc.cgi' if url[-1] == '/' else url + '/xmlrpc.cgi'
-        transport = None
+
+        handler = xmlrpclib.Transport
+        extra_kwargs = {"use_datetime": True}
         if cookiefile and parsed_url.scheme == "https":
-            transport = SafeCookiesTransport(cookiefile)
-        elif cookiefile:
-            transport = CookiesTransport(cookiefile)
+            handler = SafeCookiesTransport
+            extra_kwargs["cookiefile"] = cookiefile
+            extra_kwargs["context"] = context
+        elif cookiefile:  # Non-https, but a cookie file was specified
+            handler = CookiesTransport
+            extra_kwargs["cookiefile"] = cookiefile
+        elif parsed_url.scheme == "https":  # Https, but no cookiefile
+            handler = xmlrpclib.SafeTransport
+            extra_kwargs["context"] = context
+        else:  # Non-https and no cookiefile
+            handler = xmlrpclib.Transport
+        transport = handler(**extra_kwargs)
+
         # httplib explodes if url is unicode
         self.server = xmlrpclib.ServerProxy(
             str(url),
-            use_datetime=True,
             allow_none=True,
             transport=transport,
         )
@@ -244,8 +257,8 @@ class AbstractCookiesTransport:
     cookie file save/load functionality.
     """
 
-    def __init__(self, cookiefile=None):
-        super().__init__()
+    def __init__(self, cookiefile=None, **kwargs):
+        super().__init__(**kwargs)
         self.cookiefile = cookiefile
         self.cookies = SimpleCookie()
         self.load_cookies()
